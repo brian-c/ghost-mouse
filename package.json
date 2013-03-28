@@ -1,0 +1,10 @@
+{
+  "name": "ghost-mouse",
+  "version": "0.0.1",
+  "devDependencies": {
+    "coffee-script": "~1.6.2",
+    "nib": "~0.9.1",
+    "silver-server": "~0.1.1",
+    "stylus": "~0.32.1"
+  }
+}
