@@ -1,8 +1,29 @@
 mousePosition = [innerWidth / 2, innerHeight / 2]
 
-addEventListener 'mousemove', (e) ->
+updateMousePosition = (e) ->
+  return if e.ghostMouse?
   mousePosition[0] = e.pageX
   mousePosition[1] = e.pageY
+  bodyStyle = getComputedStyle document.body
+  bodyMargin = [(parseFloat bodyStyle.marginLeft), (parseFloat bodyStyle.marginTop)]
+  mouseDisabler.style.left = "#{mousePosition[0] - bodyMargin[0]}px"
+  mouseDisabler.style.top = "#{mousePosition[1] - bodyMargin[1]}px"
+
+killEvent = (e) ->
+  e.preventDefault()
+  e.stopPropagation()
+
+mouseDisabler = document.createElement 'div'
+document.body.appendChild mouseDisabler
+mouseDisabler.classList.add 'ghost-mouse-disabler'
+mouseDisabler.addEventListener 'mousedown', killEvent
+mouseDisabler.addEventListener 'mouseup', killEvent
+mouseDisabler.addEventListener 'click', killEvent
+mouseDisabler.addEventListener 'mousemove', (e) ->
+  updateMousePosition e
+  killEvent e
+
+document.addEventListener 'mousemove', updateMousePosition
 
 wait = (time, fn) ->
   [time, fn] = [0, time] if typeof time is 'function'
@@ -38,13 +59,14 @@ class GhostMouse
     @el.classList.add @className if @className
     @el.classList.add 'inverted' if @inverted
     @el.style.display = 'none'
-    @el.style.position = 'absolute'
     document.body.appendChild @el
 
     @queue = []
 
   run: (script) ->
     script?.call @
+
+    document.body.classList.add 'ghost-mouse-active'
 
     @_reset 0, =>
       console.log 'Run (after reset)'
@@ -61,11 +83,14 @@ class GhostMouse
   next: ->
     if @queue.length is 0
       console.log 'QUEUE EMPTY'
+
       wait @duration, =>
         @el.classList.remove 'active'
+        document.body.classList.remove 'ghost-mouse-active'
 
         wait @duration, =>
           @el.style.display = 'none'
+
     else
       command = @queue.shift()
 
@@ -75,12 +100,21 @@ class GhostMouse
     null
 
   triggerEvent: (eventName) ->
+    return unless @events
+
+    target = document.elementFromPoint x, y
+    return unless target?
+
     e = document.createEvent 'MouseEvent'
 
     bodyStyle = getComputedStyle document.body
     bodyMargin = (parseFloat n for n in [bodyStyle.marginLeft, bodyStyle.marginTop])
     currentPosition = (parseFloat n for n in [@el.style.left, @el.style.top])
-    [x, y] = [bodyMargin[0] + currentPosition[0], bodyMargin[1] + currentPosition[1]]
+
+    [x, y] = [
+      bodyMargin[0] + currentPosition[0] - scrollX
+      bodyMargin[1] + currentPosition[1] - scrollY
+    ]
 
     e.initMouseEvent eventName, true, true,
       e.view, e.detail,
@@ -88,6 +122,8 @@ class GhostMouse
       e.ctrlKey, e.shiftKey,
       e.altKey, e.metaKey,
       e.button, e.relatedTarget
+
+    e.ghostMouse = @
 
     target = document.elementFromPoint x, y
     target.dispatchEvent e
@@ -108,6 +144,7 @@ class GhostMouse
 
   do: ([duration]..., fn) ->
     @queue.push (cb) ->
+      console.log 'GHOST MOUSE DOING', fn
       fn.call @
       duration ?= @duration
       wait duration, cb
@@ -129,7 +166,7 @@ class GhostMouse
   _down: ([duration]..., cb) ->
     console.log 'GHOST MOUSE DOWN', arguments
     @el.classList.add 'down'
-    down = @triggerEvent 'mousedown' if @events
+    down = @triggerEvent 'mousedown'
     @downTarget = down.target
 
     duration ?= @duration
@@ -137,9 +174,9 @@ class GhostMouse
 
   _up: ([duration]..., cb) ->
     console.log 'GHOST MOUSE UP', arguments
-    up = @triggerEvent 'mouseup' if @events
+    up = @triggerEvent 'mouseup'
     @el.classList.remove 'down'
-    @triggerEvent 'click' if @events and @downTarget is up?.target
+    @triggerEvent 'click' if @downTarget is up?.target
     @downTarget = null
 
     duration ?= @duration
@@ -173,6 +210,8 @@ class GhostMouse
       (y * targetSize[1]) + (targetOffset[1] - elParentOffset[1])
     ]
 
+    console.log 'Moving to', JSON.stringify end
+
     duration ?= @duration
     animationDuration = duration - 250
     ticks = (i for i in [0...animationDuration] by Math.floor 1000 / @fps)
@@ -183,7 +222,7 @@ class GhostMouse
         swing = [(end[0] - start[0]) / 3 * ease, (end[1] - start[1]) / 3 * ease]
         @el.style.left = "#{(((end[0] - start[0])) * step) + start[0] + swing[0]}px"
         @el.style.top  = "#{(((end[1] - start[1])) * step) + start[1] - swing[1]}px"
-        @triggerEvent 'mousemove' if @events
+        @triggerEvent 'mousemove'
 
     @downTarget = null
 

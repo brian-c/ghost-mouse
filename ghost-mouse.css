@@ -1,3 +1,20 @@
+.ghost-mouse-disabler {
+  background: rgba(0,0,0,0.1);
+  -webkit-border-radius: 50%;
+  border-radius: 50%;
+  display: none;
+  height: 100px;
+  margin: -50px 0 0 -50px;
+  position: absolute;
+  width: 100px;
+  z-index: 9;
+}
+.ghost-mouse-disabler:active {
+  background: rgba(255,0,0,0.25);
+}
+.ghost-mouse-active .ghost-mouse-disabler {
+  display: block;
+}
 .ghost-mouse {
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0, rgba(0,0,0,0.33)), color-stop(1, rgba(0,0,0,0.67)));
   background: -webkit-linear-gradient(top, rgba(0,0,0,0.33) 0%, rgba(0,0,0,0.67) 100%);
@@ -33,6 +50,7 @@
   -ms-transition: box-shadow 0.125s ease-in-out, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, -ms-transform 0.75s ease-in-out;
   transition: box-shadow 0.125s ease-in-out, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, transform 0.75s ease-in-out;
   width: 25px;
+  z-index: 9;
 }
 .ghost-mouse.inverted {
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0, rgba(255,255,255,0.33)), color-stop(1, rgba(255,255,255,0.67)));

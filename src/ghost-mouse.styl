@@ -1,5 +1,23 @@
 @import "../node_modules/nib"
 
+.ghost-mouse-disabler
+  disabler-size = 100px
+
+  background: rgba(#000, 0.1)
+  border-radius: 50%
+  display: none
+  height: disabler-size
+  margin: (disabler-size / -2) 0 0 (disabler-size / -2)
+  position: absolute
+  width: disabler-size
+  z-index: 9
+
+  &:active
+    background: rgba(red, 0.25)
+
+  .ghost-mouse-active &
+    display: block
+
 .ghost-mouse
   size = 25px
 
@@ -22,6 +40,7 @@
     margin 0.125s ease-in-out,
     transform 0.75s ease-in-out
   width: size
+  z-index: 9
 
   &.inverted
     background: linear-gradient(top, rgba(white, 0.33), rgba(white, 0.67))
