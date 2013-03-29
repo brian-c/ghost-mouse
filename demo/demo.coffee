@@ -9,13 +9,7 @@ window.gmDemo = (e) ->
     'up'
     '.thing.three 0.75 0.75'
     'click'
-    # '.thing.four 0.25 0.25'
-    # 'down'
-    # '.thing.four 0.75 0.75'
-    # 'up'
-    # '.thing.four 0.75 0.25'
-    # 'down'
-    # '.thing.four 0.25 0.75'
-    # 'up'
+    '.thing.four 0.25 0.25'
+    'click'
     -> e.target.disabled = false
   ]

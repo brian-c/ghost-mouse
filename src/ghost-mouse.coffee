@@ -22,9 +22,12 @@ class GhostMouse
   duration: 1000
   fps: 30
   className: ''
+  events: true
 
   el: null
   queue: null
+
+  _willClick = null
 
   constructor: (commands) ->
     @el = document.createElement 'div'
@@ -67,14 +70,41 @@ class GhostMouse
       selector = selector.join ' '
       @move selector, x, y, => wait @duration, => @next()
 
+  triggerEvent: (eventName) ->
+    e = document.createEvent 'MouseEvent'
+
+    bodyStyle = getComputedStyle document.body
+    bodyMargin = (parseFloat n for n in [bodyStyle.marginLeft, bodyStyle.marginTop])
+    currentPosition = (parseFloat n for n in [@el.style.left, @el.style.top])
+    [x, y] = [bodyMargin[0] + currentPosition[0], bodyMargin[1] + currentPosition[1]]
+
+    e.initMouseEvent eventName, true, true,
+      e.view, e.detail,
+      x, y, x, y
+      e.ctrlKey, e.shiftKey,
+      e.altKey, e.metaKey,
+      e.button, e.relatedTarget
+
+    target = document.elementFromPoint x, y
+    target.dispatchEvent e
+
+    # console.log "TRIGGERING EVENT #{eventName} ON", target, "AT #{x}, #{y}"
+
+    e
+
   down: (cb) ->
     console.log 'GHOST MOUSE DOWN'
     @el.classList.add 'down'
+    down = @triggerEvent 'mousedown' if @events
+    @_willClick = down.target
     cb()
 
   up: (cb) ->
     console.log 'GHOST MOUSE UP'
+    up = @triggerEvent 'mouseup' if @events
     @el.classList.remove 'down'
+    @triggerEvent 'click' if @_willClick is up?.target
+    @_willClick = null
     cb()
 
   click: (cb) ->
@@ -86,7 +116,7 @@ class GhostMouse
 
   move: (target, x, y, cb) ->
     target = document.querySelector target if typeof target is 'string'
-    console.log "GHOST MOUSE POSITION (#{x}, #{y})", target
+    console.log "GHOST MOUSE MOVE (#{x}, #{y})", target
 
     targetStyle = getComputedStyle target
     targetSize = [(parseFloat targetStyle.width), (parseFloat targetStyle.height)]
@@ -111,6 +141,9 @@ class GhostMouse
         swing = [(end[0] - start[0]) / 3 * ease, (end[1] - start[1]) / 3 * ease]
         @el.style.left = "#{(((end[0] - start[0])) * step) + start[0] + swing[0]}px"
         @el.style.top  = "#{(((end[1] - start[1])) * step) + start[1] - swing[1]}px"
+        @triggerEvent 'mousemove' if @events
+
+    @_willClick = null
 
     wait @duration, => cb()
 

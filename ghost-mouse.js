@@ -33,15 +33,21 @@
   };
 
   GhostMouse = (function() {
+    var _willClick;
+
     GhostMouse.prototype.duration = 1000;
 
     GhostMouse.prototype.fps = 30;
 
     GhostMouse.prototype.className = '';
 
+    GhostMouse.prototype.events = true;
+
     GhostMouse.prototype.el = null;
 
     GhostMouse.prototype.queue = null;
+
+    _willClick = null;
 
     function GhostMouse(commands) {
       this.el = document.createElement('div');
@@ -107,15 +113,64 @@
       }
     };
 
+    GhostMouse.prototype.triggerEvent = function(eventName) {
+      var bodyMargin, bodyStyle, currentPosition, e, n, target, x, y, _ref;
+
+      e = document.createEvent('MouseEvent');
+      bodyStyle = getComputedStyle(document.body);
+      bodyMargin = (function() {
+        var _i, _len, _ref, _results;
+
+        _ref = [bodyStyle.marginLeft, bodyStyle.marginTop];
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          n = _ref[_i];
+          _results.push(parseFloat(n));
+        }
+        return _results;
+      })();
+      currentPosition = (function() {
+        var _i, _len, _ref, _results;
+
+        _ref = [this.el.style.left, this.el.style.top];
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          n = _ref[_i];
+          _results.push(parseFloat(n));
+        }
+        return _results;
+      }).call(this);
+      _ref = [bodyMargin[0] + currentPosition[0], bodyMargin[1] + currentPosition[1]], x = _ref[0], y = _ref[1];
+      e.initMouseEvent(eventName, true, true, e.view, e.detail, x, y, x, y, e.ctrlKey, e.shiftKey, e.altKey, e.metaKey, e.button, e.relatedTarget);
+      target = document.elementFromPoint(x, y);
+      target.dispatchEvent(e);
+      return e;
+    };
+
     GhostMouse.prototype.down = function(cb) {
+      var down;
+
       console.log('GHOST MOUSE DOWN');
       this.el.classList.add('down');
+      if (this.events) {
+        down = this.triggerEvent('mousedown');
+      }
+      this._willClick = down.target;
       return cb();
     };
 
     GhostMouse.prototype.up = function(cb) {
+      var up;
+
       console.log('GHOST MOUSE UP');
+      if (this.events) {
+        up = this.triggerEvent('mouseup');
+      }
       this.el.classList.remove('down');
+      if (this._willClick === (up != null ? up.target : void 0)) {
+        this.triggerEvent('click');
+      }
+      this._willClick = null;
       return cb();
     };
 
@@ -139,7 +194,7 @@
       if (typeof target === 'string') {
         target = document.querySelector(target);
       }
-      console.log("GHOST MOUSE POSITION (" + x + ", " + y + ")", target);
+      console.log("GHOST MOUSE MOVE (" + x + ", " + y + ")", target);
       targetStyle = getComputedStyle(target);
       targetSize = [parseFloat(targetStyle.width), parseFloat(targetStyle.height)];
       targetOffset = getOffset(target);
@@ -163,13 +218,17 @@
           ease = Math.sin(step * Math.PI);
           swing = [(end[0] - start[0]) / 3 * ease, (end[1] - start[1]) / 3 * ease];
           _this.el.style.left = "" + (((end[0] - start[0]) * step) + start[0] + swing[0]) + "px";
-          return _this.el.style.top = "" + (((end[1] - start[1]) * step) + start[1] - swing[1]) + "px";
+          _this.el.style.top = "" + (((end[1] - start[1]) * step) + start[1] - swing[1]) + "px";
+          if (_this.events) {
+            return _this.triggerEvent('mousemove');
+          }
         });
       };
       for (_i = 0, _len = ticks.length; _i < _len; _i++) {
         tick = ticks[_i];
         _fn(tick);
       }
+      this._willClick = null;
       return wait(this.duration, function() {
         return cb();
       });

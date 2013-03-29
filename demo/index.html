@@ -14,10 +14,10 @@
     <p><button onclick="gmDemo(arguments[0]);">Show me</button></p>
 
     <div class="things">
-      <div class="thing one">1</div>
-      <div class="thing two">2</div>
-      <div class="thing three">3</div>
-      <div class="thing four">4</div>
+      <div class="thing one" onmousedown="console.info('Down on #1');">1</div>
+      <div class="thing two" onmousemove="console.info('Move on #2');">2</div>
+      <div class="thing three" onmouseup="console.info('Up on #3');">3</div>
+      <div class="thing four" onclick="console.info('Click on #4');">4</div>
     </div>
 
     <script src="../ghost-mouse.js"></script>
