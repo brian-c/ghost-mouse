@@ -29,7 +29,9 @@ class GhostMouse
 
   downTarget = null
 
-  constructor: (commands) ->
+  constructor: (params = {}) ->
+    @[property] = value for property, value of params
+
     @el = document.createElement 'div'
     @el.classList.add 'ghost-mouse'
     @el.classList.add @className if @className
@@ -39,36 +41,36 @@ class GhostMouse
 
     @queue = []
 
-    @go commands if commands?
+  run: (script) ->
+    script?.call @
 
-  go: (commands) ->
-    @queue.push commands...
-
-    @reset =>
+    @_reset 0, =>
+      console.log 'Run (after reset)'
       @el.style.display = ''
-      wait 10, => @el.classList.add 'active'
-      wait @duration, => @next()
+
+      wait 10, =>
+        console.log 'Add active class'
+        @el.classList.add 'active'
+
+      wait @duration, =>
+        @next()
+    @
 
   next: ->
     if @queue.length is 0
       console.log 'QUEUE EMPTY'
-      @el.classList.remove 'active'
-      wait @duration, => @el.style.display = 'none'
-      return
+      wait @duration, =>
+        @el.classList.remove 'active'
 
-    command = @queue.shift()
-
-    if typeof command is 'function'
-      command.call @
-      @next()
-
-    else if command of @
-      @[command] => wait @duration, => @next()
-
+        wait @duration, =>
+          @el.style.display = 'none'
     else
-      [selector..., x, y] = command.split /\s+/
-      selector = selector.join ' '
-      @move selector, x, y, => wait @duration, => @next()
+      command = @queue.shift()
+
+      command.call @, =>
+        @next()
+
+    null
 
   triggerEvent: (eventName) ->
     e = document.createEvent 'MouseEvent'
@@ -92,31 +94,67 @@ class GhostMouse
 
     e
 
-  down: (cb) ->
-    console.log 'GHOST MOUSE DOWN'
+  # Attach interface methods that add actions to the queue.
+  methods = ['down', 'up', 'click', 'move', 'reset']
+
+  for method in methods then do (method) =>
+    @::[method] = (originalArgs...) ->
+      @queue.push (callArgs...) ->
+        @["_#{method}"] originalArgs..., callArgs...
+
+      @
+
+  do: ([duration]..., fn) ->
+    @queue.push (cb) ->
+      fn.call @
+      duration ?= @duration
+      wait duration, cb
+
+    @
+
+  _reset: ([duration]..., cb) ->
+    console.log 'GHOST MOUSE RESET'
+    bodyStyle = getComputedStyle document.body
+    bodyMargin = [(parseFloat bodyStyle.marginLeft), (parseFloat bodyStyle.marginTop)]
+
+    @el.style.left = "#{mousePosition[0] - bodyMargin[0]}px"
+    @el.style.top = "#{mousePosition[1] - bodyMargin[1]}px"
+
+    duration ?= @duration
+    console.log 'reset duration', duration
+    wait duration, cb
+
+  _down: ([duration]..., cb) ->
+    console.log 'GHOST MOUSE DOWN', arguments
     @el.classList.add 'down'
     down = @triggerEvent 'mousedown' if @events
     @downTarget = down.target
-    cb()
 
-  up: (cb) ->
-    console.log 'GHOST MOUSE UP'
+    duration ?= @duration
+    wait duration, cb
+
+  _up: ([duration]..., cb) ->
+    console.log 'GHOST MOUSE UP', arguments
     up = @triggerEvent 'mouseup' if @events
     @el.classList.remove 'down'
     @triggerEvent 'click' if @events and @downTarget is up?.target
     @downTarget = null
-    cb()
 
-  click: (cb) ->
-    console.log 'GHOST MOUSE CLICK'
-    @down =>
-      wait 250, =>
-        @up =>
-          cb()
+    duration ?= @duration
+    wait duration, cb
 
-  move: (target, x, y, cb) ->
+  _click: ([duration]..., cb) ->
+    console.log 'GHOST MOUSE CLICK', arguments
+    @_down 250, =>
+      @_up -> # No-op
+
+    duration ?= @duration
+    wait duration, cb
+
+  _move: (target, x, y, [duration]..., cb) ->
     target = document.querySelector target if typeof target is 'string'
-    console.log "GHOST MOUSE MOVE (#{x}, #{y})", target
+
+    console.log "GHOST MOUSE MOVE", arguments
 
     targetStyle = getComputedStyle target
     targetSize = [(parseFloat targetStyle.width), (parseFloat targetStyle.height)]
@@ -133,10 +171,12 @@ class GhostMouse
       (y * targetSize[1]) + (targetOffset[1] - elParentOffset[1])
     ]
 
-    ticks = (i for i in [0...@duration] by Math.floor 1000 / @fps)
+    duration ?= @duration
+    animationDuration = duration - 250
+    ticks = (i for i in [0...animationDuration] by Math.floor 1000 / @fps)
     for tick in ticks then do (tick) =>
       wait tick, =>
-        step = tick / @duration
+        step = tick / animationDuration
         ease = Math.sin step * Math.PI
         swing = [(end[0] - start[0]) / 3 * ease, (end[1] - start[1]) / 3 * ease]
         @el.style.left = "#{(((end[0] - start[0])) * step) + start[0] + swing[0]}px"
@@ -145,24 +185,16 @@ class GhostMouse
 
     @downTarget = null
 
-    wait @duration, => cb()
-
-  reset: (cb) ->
-    console.log 'GHOST MOUSE RESET'
-    bodyStyle = getComputedStyle document.body
-    bodyMargin = [(parseFloat bodyStyle.marginLeft), (parseFloat bodyStyle.marginTop)]
-
-    @el.style.left = "#{mousePosition[0] - bodyMargin[0]}px"
-    @el.style.top = "#{mousePosition[1] - bodyMargin[1]}px"
-
-    cb()
+    wait duration, cb
 
   stop: ->
     @queue.splice 0
+    @
 
   destroy: ->
     @stop()
     @el.parentNode.removeChild @el
+    null
 
 window?.GhostMouse = GhostMouse
 module?.exports = GhostMouse

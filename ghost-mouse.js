@@ -33,7 +33,8 @@
   };
 
   GhostMouse = (function() {
-    var downTarget;
+    var downTarget, method, methods, _fn, _i, _len,
+      _this = this;
 
     GhostMouse.prototype.duration = 1000;
 
@@ -49,7 +50,16 @@
 
     downTarget = null;
 
-    function GhostMouse(commands) {
+    function GhostMouse(params) {
+      var property, value;
+
+      if (params == null) {
+        params = {};
+      }
+      for (property in params) {
+        value = params[property];
+        this[property] = value;
+      }
       this.el = document.createElement('div');
       this.el.classList.add('ghost-mouse');
       if (this.className) {
@@ -59,58 +69,47 @@
       this.el.style.position = 'absolute';
       document.body.appendChild(this.el);
       this.queue = [];
-      if (commands != null) {
-        this.go(commands);
-      }
     }
 
-    GhostMouse.prototype.go = function(commands) {
-      var _ref,
-        _this = this;
+    GhostMouse.prototype.run = function(script) {
+      var _this = this;
 
-      (_ref = this.queue).push.apply(_ref, commands);
-      return this.reset(function() {
+      if (script != null) {
+        script.call(this);
+      }
+      this._reset(0, function() {
+        console.log('Run (after reset)');
         _this.el.style.display = '';
         wait(10, function() {
+          console.log('Add active class');
           return _this.el.classList.add('active');
         });
         return wait(_this.duration, function() {
           return _this.next();
         });
       });
+      return this;
     };
 
     GhostMouse.prototype.next = function() {
-      var command, selector, x, y, _i, _ref,
+      var command,
         _this = this;
 
       if (this.queue.length === 0) {
         console.log('QUEUE EMPTY');
-        this.el.classList.remove('active');
         wait(this.duration, function() {
-          return _this.el.style.display = 'none';
-        });
-        return;
-      }
-      command = this.queue.shift();
-      if (typeof command === 'function') {
-        command.call(this);
-        return this.next();
-      } else if (command in this) {
-        return this[command](function() {
+          _this.el.classList.remove('active');
           return wait(_this.duration, function() {
-            return _this.next();
+            return _this.el.style.display = 'none';
           });
         });
       } else {
-        _ref = command.split(/\s+/), selector = 3 <= _ref.length ? __slice.call(_ref, 0, _i = _ref.length - 2) : (_i = 0, []), x = _ref[_i++], y = _ref[_i++];
-        selector = selector.join(' ');
-        return this.move(selector, x, y, function() {
-          return wait(_this.duration, function() {
-            return _this.next();
-          });
+        command = this.queue.shift();
+        command.call(this, function() {
+          return _this.next();
         });
       }
+      return null;
     };
 
     GhostMouse.prototype.triggerEvent = function(eventName) {
@@ -147,22 +146,82 @@
       return e;
     };
 
-    GhostMouse.prototype.down = function(cb) {
-      var down;
+    methods = ['down', 'up', 'click', 'move', 'reset'];
 
-      console.log('GHOST MOUSE DOWN');
+    _fn = function(method) {
+      return GhostMouse.prototype[method] = function() {
+        var originalArgs;
+
+        originalArgs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        this.queue.push(function() {
+          var callArgs;
+
+          callArgs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          return this["_" + method].apply(this, __slice.call(originalArgs).concat(__slice.call(callArgs)));
+        });
+        return this;
+      };
+    };
+    for (_i = 0, _len = methods.length; _i < _len; _i++) {
+      method = methods[_i];
+      _fn(method);
+    }
+
+    GhostMouse.prototype["do"] = function() {
+      var duration, fn, _arg, _j;
+
+      _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), fn = arguments[_j++];
+      duration = _arg[0];
+      this.queue.push(function(cb) {
+        fn.call(this);
+        if (duration == null) {
+          duration = this.duration;
+        }
+        return wait(duration, cb);
+      });
+      return this;
+    };
+
+    GhostMouse.prototype._reset = function() {
+      var bodyMargin, bodyStyle, cb, duration, _arg, _j;
+
+      _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), cb = arguments[_j++];
+      duration = _arg[0];
+      console.log('GHOST MOUSE RESET');
+      bodyStyle = getComputedStyle(document.body);
+      bodyMargin = [parseFloat(bodyStyle.marginLeft), parseFloat(bodyStyle.marginTop)];
+      this.el.style.left = "" + (mousePosition[0] - bodyMargin[0]) + "px";
+      this.el.style.top = "" + (mousePosition[1] - bodyMargin[1]) + "px";
+      if (duration == null) {
+        duration = this.duration;
+      }
+      console.log('reset duration', duration);
+      return wait(duration, cb);
+    };
+
+    GhostMouse.prototype._down = function() {
+      var cb, down, duration, _arg, _j;
+
+      _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), cb = arguments[_j++];
+      duration = _arg[0];
+      console.log('GHOST MOUSE DOWN', arguments);
       this.el.classList.add('down');
       if (this.events) {
         down = this.triggerEvent('mousedown');
       }
       this.downTarget = down.target;
-      return cb();
+      if (duration == null) {
+        duration = this.duration;
+      }
+      return wait(duration, cb);
     };
 
-    GhostMouse.prototype.up = function(cb) {
-      var up;
+    GhostMouse.prototype._up = function() {
+      var cb, duration, up, _arg, _j;
 
-      console.log('GHOST MOUSE UP');
+      _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), cb = arguments[_j++];
+      duration = _arg[0];
+      console.log('GHOST MOUSE UP', arguments);
       if (this.events) {
         up = this.triggerEvent('mouseup');
       }
@@ -171,50 +230,62 @@
         this.triggerEvent('click');
       }
       this.downTarget = null;
-      return cb();
+      if (duration == null) {
+        duration = this.duration;
+      }
+      return wait(duration, cb);
     };
 
-    GhostMouse.prototype.click = function(cb) {
-      var _this = this;
-
-      console.log('GHOST MOUSE CLICK');
-      return this.down(function() {
-        return wait(250, function() {
-          return _this.up(function() {
-            return cb();
-          });
-        });
-      });
-    };
-
-    GhostMouse.prototype.move = function(target, x, y, cb) {
-      var elParentOffset, end, i, start, targetOffset, targetSize, targetStyle, tick, ticks, _fn, _i, _len,
+    GhostMouse.prototype._click = function() {
+      var cb, duration, _arg, _j,
         _this = this;
 
+      _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), cb = arguments[_j++];
+      duration = _arg[0];
+      console.log('GHOST MOUSE CLICK', arguments);
+      this._down(250, function() {
+        return _this._up(function() {});
+      });
+      if (duration == null) {
+        duration = this.duration;
+      }
+      return wait(duration, cb);
+    };
+
+    GhostMouse.prototype._move = function() {
+      var animationDuration, cb, duration, elParentOffset, end, i, start, target, targetOffset, targetSize, targetStyle, tick, ticks, x, y, _arg, _fn1, _j, _k, _len1,
+        _this = this;
+
+      target = arguments[0], x = arguments[1], y = arguments[2], _arg = 5 <= arguments.length ? __slice.call(arguments, 3, _j = arguments.length - 1) : (_j = 3, []), cb = arguments[_j++];
+      duration = _arg[0];
       if (typeof target === 'string') {
         target = document.querySelector(target);
       }
-      console.log("GHOST MOUSE MOVE (" + x + ", " + y + ")", target);
+      console.log("GHOST MOUSE MOVE", arguments);
       targetStyle = getComputedStyle(target);
       targetSize = [parseFloat(targetStyle.width), parseFloat(targetStyle.height)];
       targetOffset = getOffset(target);
       elParentOffset = getOffset(this.el.parentNode);
       start = [parseFloat(this.el.style.left || 0), parseFloat(this.el.style.top || 0)];
       end = [(x * targetSize[0]) + (targetOffset[0] - elParentOffset[0]), (y * targetSize[1]) + (targetOffset[1] - elParentOffset[1])];
+      if (duration == null) {
+        duration = this.duration;
+      }
+      animationDuration = duration - 250;
       ticks = (function() {
-        var _i, _ref, _ref1, _results;
+        var _k, _ref, _results;
 
         _results = [];
-        for (i = _i = 0, _ref = this.duration, _ref1 = Math.floor(1000 / this.fps); _ref1 > 0 ? _i < _ref : _i > _ref; i = _i += _ref1) {
+        for (i = _k = 0, _ref = Math.floor(1000 / this.fps); _ref > 0 ? _k < animationDuration : _k > animationDuration; i = _k += _ref) {
           _results.push(i);
         }
         return _results;
       }).call(this);
-      _fn = function(tick) {
+      _fn1 = function(tick) {
         return wait(tick, function() {
           var ease, step, swing;
 
-          step = tick / _this.duration;
+          step = tick / animationDuration;
           ease = Math.sin(step * Math.PI);
           swing = [(end[0] - start[0]) / 3 * ease, (end[1] - start[1]) / 3 * ease];
           _this.el.style.left = "" + (((end[0] - start[0]) * step) + start[0] + swing[0]) + "px";
@@ -224,39 +295,28 @@
           }
         });
       };
-      for (_i = 0, _len = ticks.length; _i < _len; _i++) {
-        tick = ticks[_i];
-        _fn(tick);
+      for (_k = 0, _len1 = ticks.length; _k < _len1; _k++) {
+        tick = ticks[_k];
+        _fn1(tick);
       }
       this.downTarget = null;
-      return wait(this.duration, function() {
-        return cb();
-      });
-    };
-
-    GhostMouse.prototype.reset = function(cb) {
-      var bodyMargin, bodyStyle;
-
-      console.log('GHOST MOUSE RESET');
-      bodyStyle = getComputedStyle(document.body);
-      bodyMargin = [parseFloat(bodyStyle.marginLeft), parseFloat(bodyStyle.marginTop)];
-      this.el.style.left = "" + (mousePosition[0] - bodyMargin[0]) + "px";
-      this.el.style.top = "" + (mousePosition[1] - bodyMargin[1]) + "px";
-      return cb();
+      return wait(duration, cb);
     };
 
     GhostMouse.prototype.stop = function() {
-      return this.queue.splice(0);
+      this.queue.splice(0);
+      return this;
     };
 
     GhostMouse.prototype.destroy = function() {
       this.stop();
-      return this.el.parentNode.removeChild(this.el);
+      this.el.parentNode.removeChild(this.el);
+      return null;
     };
 
     return GhostMouse;
 
-  })();
+  }).call(this);
 
   if (typeof window !== "undefined" && window !== null) {
     window.GhostMouse = GhostMouse;
