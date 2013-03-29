@@ -1,8 +1,8 @@
-mouse = [NaN, NaN]
+mousePosition = [innerWidth / 2, innerHeight / 2]
 
 addEventListener 'mousemove', (e) ->
-  mouse[0] = e.pageX
-  mouse[1] = e.pageY
+  mousePosition[0] = e.pageX
+  mousePosition[1] = e.pageY
 
 wait = (time, fn) ->
   [time, fn] = [0, time] if typeof time is 'function'
@@ -19,16 +19,8 @@ getOffset = (el) ->
   offset
 
 class GhostMouse
-  @genericInstance: null
-
-  @go: (commands) ->
-    @genericInstance ?= new @
-    @genericInstance.go arguments...
-
-  @stop: ->
-    @genericInstance?.stop arguments...
-
   duration: 1000
+  fps: 30
   className: ''
 
   el: null
@@ -51,7 +43,7 @@ class GhostMouse
 
     @reset =>
       @el.style.display = ''
-      wait => @el.classList.add 'active'
+      wait 10, => @el.classList.add 'active'
       wait @duration, => @next()
 
   next: ->
@@ -73,7 +65,7 @@ class GhostMouse
     else
       [selector..., x, y] = command.split /\s+/
       selector = selector.join ' '
-      @position selector, x, y, => wait @duration, => @next()
+      @move selector, x, y, => wait @duration, => @next()
 
   down: (cb) ->
     console.log 'GHOST MOUSE DOWN'
@@ -92,29 +84,45 @@ class GhostMouse
         @up =>
           cb()
 
-  position: (target, x, y, cb) ->
-    # Position at target x, y
+  move: (target, x, y, cb) ->
     target = document.querySelector target if typeof target is 'string'
     console.log "GHOST MOUSE POSITION (#{x}, #{y})", target
 
     targetStyle = getComputedStyle target
-
     targetSize = [(parseFloat targetStyle.width), (parseFloat targetStyle.height)]
     targetOffset = getOffset target
     elParentOffset = getOffset @el.parentNode
 
-    @el.style.left = (x * targetSize[0]) + (targetOffset[0] - elParentOffset[0])
-    @el.style.top  = (y * targetSize[1]) + (targetOffset[1] - elParentOffset[1])
+    start = [
+      parseFloat @el.style.left || 0
+      parseFloat @el.style.top || 0
+    ]
 
-    cb()
+    end = [
+      (x * targetSize[0]) + (targetOffset[0] - elParentOffset[0])
+      (y * targetSize[1]) + (targetOffset[1] - elParentOffset[1])
+    ]
+
+    ticks = (i for i in [0...@duration] by Math.floor 1000 / @fps)
+    for tick in ticks then do (tick) =>
+      wait tick, =>
+        step = tick / @duration
+        ease = Math.sin step * Math.PI
+        swing = [(end[0] - start[0]) / 3 * ease, (end[1] - start[1]) / 3 * ease]
+        @el.style.left = "#{(((end[0] - start[0])) * step) + start[0] + swing[0]}px"
+        @el.style.top  = "#{(((end[1] - start[1])) * step) + start[1] - swing[1]}px"
+
+    wait @duration, => cb()
 
   reset: (cb) ->
     console.log 'GHOST MOUSE RESET'
     bodyStyle = getComputedStyle document.body
-    bodySize = [(parseFloat bodyStyle.width), (parseFloat bodyStyle.height)]
     bodyMargin = [(parseFloat bodyStyle.marginLeft), (parseFloat bodyStyle.marginTop)]
 
-    @position document.body, ((mouse[0] - bodyMargin[0]) / bodySize[0]), ((mouse[1] - bodyMargin[1]) / bodySize[1]), cb
+    @el.style.left = "#{mousePosition[0] - bodyMargin[0]}px"
+    @el.style.top = "#{mousePosition[1] - bodyMargin[1]}px"
+
+    cb()
 
   stop: ->
     @queue.splice 0

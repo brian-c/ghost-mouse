@@ -27,11 +27,11 @@
   -o-transform: scale(4);
   -ms-transform: scale(4);
   transform: scale(4);
-  -webkit-transition: box-shadow 0.125s ease-in-out, left 0.75s ease-in, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, top 0.75s ease-out, -webkit-transform 0.75s ease-in-out;
-  -moz-transition: box-shadow 0.125s ease-in-out, left 0.75s ease-in, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, top 0.75s ease-out, -moz-transform 0.75s ease-in-out;
-  -o-transition: box-shadow 0.125s ease-in-out, left 0.75s ease-in, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, top 0.75s ease-out, -o-transform 0.75s ease-in-out;
-  -ms-transition: box-shadow 0.125s ease-in-out, left 0.75s ease-in, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, top 0.75s ease-out, -ms-transform 0.75s ease-in-out;
-  transition: box-shadow 0.125s ease-in-out, left 0.75s ease-in, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, top 0.75s ease-out, transform 0.75s ease-in-out;
+  -webkit-transition: box-shadow 0.125s ease-in-out, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, -webkit-transform 0.75s ease-in-out;
+  -moz-transition: box-shadow 0.125s ease-in-out, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, -moz-transform 0.75s ease-in-out;
+  -o-transition: box-shadow 0.125s ease-in-out, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, -o-transform 0.75s ease-in-out;
+  -ms-transition: box-shadow 0.125s ease-in-out, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, -ms-transform 0.75s ease-in-out;
+  transition: box-shadow 0.125s ease-in-out, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, transform 0.75s ease-in-out;
   width: 25px;
 }
 .ghost-mouse.active {
