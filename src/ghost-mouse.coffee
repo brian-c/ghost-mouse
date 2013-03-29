@@ -1,10 +1,11 @@
 mousePosition = [innerWidth / 2, innerHeight / 2]
+bodyStyle = getComputedStyle document.body
 
 updateMousePosition = (e) ->
   return if e.ghostMouse?
   mousePosition[0] = e.pageX
   mousePosition[1] = e.pageY
-  bodyStyle = getComputedStyle document.body
+
   bodyMargin = [(parseFloat bodyStyle.marginLeft), (parseFloat bodyStyle.marginTop)]
   mouseDisabler.style.left = "#{mousePosition[0] - bodyMargin[0]}px"
   mouseDisabler.style.top = "#{mousePosition[1] - bodyMargin[1]}px"
@@ -16,12 +17,12 @@ killEvent = (e) ->
 mouseDisabler = document.createElement 'div'
 document.body.appendChild mouseDisabler
 mouseDisabler.classList.add 'ghost-mouse-disabler'
-mouseDisabler.addEventListener 'mousedown', killEvent
-mouseDisabler.addEventListener 'mouseup', killEvent
 mouseDisabler.addEventListener 'click', killEvent
+mouseDisabler.addEventListener 'mouseup', killEvent
+mouseDisabler.addEventListener 'mousedown', killEvent
 mouseDisabler.addEventListener 'mousemove', (e) ->
-  updateMousePosition e
   killEvent e
+  updateMousePosition e # The handler on document doesn't fire because we killed the event.
 
 document.addEventListener 'mousemove', updateMousePosition
 
