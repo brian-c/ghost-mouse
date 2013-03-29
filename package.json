@@ -1,6 +1,6 @@
 {
   "name": "ghost-mouse",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "devDependencies": {
     "coffee-script": "~1.6.2",
     "nib": "~0.9.1",
