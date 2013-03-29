@@ -33,21 +33,21 @@
   };
 
   GhostMouse = (function() {
-    var _willClick;
+    var downTarget;
 
     GhostMouse.prototype.duration = 1000;
 
-    GhostMouse.prototype.fps = 30;
+    GhostMouse.prototype.events = true;
 
     GhostMouse.prototype.className = '';
 
-    GhostMouse.prototype.events = true;
+    GhostMouse.prototype.fps = 30;
 
     GhostMouse.prototype.el = null;
 
     GhostMouse.prototype.queue = null;
 
-    _willClick = null;
+    downTarget = null;
 
     function GhostMouse(commands) {
       this.el = document.createElement('div');
@@ -155,7 +155,7 @@
       if (this.events) {
         down = this.triggerEvent('mousedown');
       }
-      this._willClick = down.target;
+      this.downTarget = down.target;
       return cb();
     };
 
@@ -167,10 +167,10 @@
         up = this.triggerEvent('mouseup');
       }
       this.el.classList.remove('down');
-      if (this._willClick === (up != null ? up.target : void 0)) {
+      if (this.events && this.downTarget === (up != null ? up.target : void 0)) {
         this.triggerEvent('click');
       }
-      this._willClick = null;
+      this.downTarget = null;
       return cb();
     };
 
@@ -228,7 +228,7 @@
         tick = ticks[_i];
         _fn(tick);
       }
-      this._willClick = null;
+      this.downTarget = null;
       return wait(this.duration, function() {
         return cb();
       });

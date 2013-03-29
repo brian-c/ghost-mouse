@@ -20,14 +20,14 @@ getOffset = (el) ->
 
 class GhostMouse
   duration: 1000
-  fps: 30
-  className: ''
   events: true
+  className: ''
+  fps: 30
 
   el: null
   queue: null
 
-  _willClick = null
+  downTarget = null
 
   constructor: (commands) ->
     @el = document.createElement 'div'
@@ -63,7 +63,7 @@ class GhostMouse
       @next()
 
     else if command of @
-        @[command] => wait @duration, => @next()
+      @[command] => wait @duration, => @next()
 
     else
       [selector..., x, y] = command.split /\s+/
@@ -96,15 +96,15 @@ class GhostMouse
     console.log 'GHOST MOUSE DOWN'
     @el.classList.add 'down'
     down = @triggerEvent 'mousedown' if @events
-    @_willClick = down.target
+    @downTarget = down.target
     cb()
 
   up: (cb) ->
     console.log 'GHOST MOUSE UP'
     up = @triggerEvent 'mouseup' if @events
     @el.classList.remove 'down'
-    @triggerEvent 'click' if @_willClick is up?.target
-    @_willClick = null
+    @triggerEvent 'click' if @events and @downTarget is up?.target
+    @downTarget = null
     cb()
 
   click: (cb) ->
@@ -143,7 +143,7 @@ class GhostMouse
         @el.style.top  = "#{(((end[1] - start[1])) * step) + start[1] - swing[1]}px"
         @triggerEvent 'mousemove' if @events
 
-    @_willClick = null
+    @downTarget = null
 
     wait @duration, => cb()
 
