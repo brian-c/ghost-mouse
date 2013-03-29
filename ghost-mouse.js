@@ -42,6 +42,8 @@
 
     GhostMouse.prototype.className = '';
 
+    GhostMouse.prototype.inverted = false;
+
     GhostMouse.prototype.fps = 30;
 
     GhostMouse.prototype.el = null;
@@ -64,6 +66,9 @@
       this.el.classList.add('ghost-mouse');
       if (this.className) {
         this.el.classList.add(this.className);
+      }
+      if (this.inverted) {
+        this.el.classList.add('inverted');
       }
       this.el.style.display = 'none';
       this.el.style.position = 'absolute';

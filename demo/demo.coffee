@@ -1,4 +1,5 @@
 window.gm = new GhostMouse
+window.gm2 = new GhostMouse inverted: true
 
 window.demo = (e) ->
   window.gm.run ->
@@ -14,7 +15,7 @@ window.demo = (e) ->
     @do 0, -> e.target.disabled = false
 
 window.demoChained = (e) ->
-  window.gm
+  window.gm2
     .do(0, -> e.target.disabled = true)
     .move('.one', 0.5, 0.5)
     .down()

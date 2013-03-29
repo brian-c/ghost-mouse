@@ -22,6 +22,7 @@ class GhostMouse
   duration: 1000
   events: true
   className: ''
+  inverted: false
   fps: 30
 
   el: null
@@ -35,6 +36,7 @@ class GhostMouse
     @el = document.createElement 'div'
     @el.classList.add 'ghost-mouse'
     @el.classList.add @className if @className
+    @el.classList.add 'inverted' if @inverted
     @el.style.display = 'none'
     @el.style.position = 'absolute'
     document.body.appendChild @el
