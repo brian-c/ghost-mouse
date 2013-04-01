@@ -221,7 +221,7 @@
       _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), fn = arguments[_j++];
       duration = _arg[0];
       this.queue.push(function(cb) {
-        console.log('GHOST MOUSE DOING', fn);
+        console.log('GHOST MOUSE DO', arguments);
         fn.call(this);
         if (duration == null) {
           duration = this.duration;
@@ -229,6 +229,26 @@
         return wait(duration, cb);
       });
       return this;
+    };
+
+    GhostMouse.prototype.drag = function() {
+      var cb, duration, target, x, y, _arg, _j;
+
+      target = arguments[0], x = arguments[1], y = arguments[2], _arg = 5 <= arguments.length ? __slice.call(arguments, 3, _j = arguments.length - 1) : (_j = 3, []), cb = arguments[_j++];
+      duration = _arg[0];
+      return this.queue.push(function(cb) {
+        var _this = this;
+
+        console.log('GHOST MOUSE DRAG', arguments);
+        if (duration == null) {
+          duration = this.duration;
+        }
+        return this._down(100, function() {
+          return _this._move(target, x, y, duration - 200, function() {
+            return _this._up(100, cb);
+          });
+        });
+      });
     };
 
     GhostMouse.prototype._reset = function() {

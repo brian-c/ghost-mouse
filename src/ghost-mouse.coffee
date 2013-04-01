@@ -145,12 +145,20 @@ class GhostMouse
 
   do: ([duration]..., fn) ->
     @queue.push (cb) ->
-      console.log 'GHOST MOUSE DOING', fn
+      console.log 'GHOST MOUSE DO', arguments
       fn.call @
       duration ?= @duration
       wait duration, cb
 
     @
+
+  drag: (target, x, y, [duration]..., cb) ->
+    @queue.push (cb) ->
+      console.log 'GHOST MOUSE DRAG', arguments
+      duration ?= @duration
+      @_down 100, =>
+        @_move target, x, y, duration - 200, =>
+          @_up 100, cb
 
   _reset: ([duration]..., cb) ->
     console.log 'GHOST MOUSE RESET'
