@@ -44,7 +44,7 @@ getOffset = (el) ->
 
 class GhostMouse
   duration: 1000
-  events: true
+  events: false
   className: ''
   inverted: false
   fps: 30
@@ -52,7 +52,8 @@ class GhostMouse
   el: null
   queue: null
 
-  downTarget = null
+  isDown: false
+  downTarget: null
 
   constructor: (params = {}) ->
     @[property] = value for property, value of params
@@ -186,17 +187,19 @@ class GhostMouse
 
   _down: ([duration]..., cb) ->
     console.log 'GHOST MOUSE DOWN', arguments
+    @isDown = true
     @el.classList.add 'down'
     down = @triggerEvent 'mousedown'
-    @downTarget = down.target
+    @downTarget = down?.target
 
     duration ?= @duration
     wait duration, cb
 
   _up: ([duration]..., cb) ->
     console.log 'GHOST MOUSE UP', arguments
-    up = @triggerEvent 'mouseup'
+    @isDown = false
     @el.classList.remove 'down'
+    up = @triggerEvent 'mouseup'
     @triggerEvent 'click' if @downTarget is up?.target
     @downTarget = null
 
@@ -241,9 +244,24 @@ class GhostMouse
         step = tick / animationDuration
         ease = Math.sin step * Math.PI
         swing = [(end[0] - start[0]) / 3 * ease, (end[1] - start[1]) / 3 * ease]
-        @el.style.left = "#{(((end[0] - start[0])) * step) + start[0] + swing[0]}px"
-        @el.style.top  = "#{(((end[1] - start[1])) * step) + start[1] - swing[1]}px"
+
+        left = "#{(((end[0] - start[0])) * step) + start[0] + swing[0]}px"
+        top  = "#{(((end[1] - start[1])) * step) + start[1] - swing[1]}px"
+
+        @el.style.left = left
+        @el.style.top  = top
+
         @triggerEvent 'mousemove'
+
+        if @isDown and not @events
+          trail = document.createElement 'div'
+          console.log trail
+          trail.classList.add 'ghost-mouse-trail'
+          trail.style.left = left
+          trail.style.top = top
+          @el.parentNode.appendChild trail
+          wait duration / 2, ->
+            trail.parentNode.removeChild trail
 
     @downTarget = null
 

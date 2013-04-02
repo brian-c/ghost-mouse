@@ -7,7 +7,7 @@
   margin: -50px 0 0 -50px;
   position: absolute;
   width: 100px;
-  z-index: 9;
+  z-index: 8;
 }
 .ghost-mouse-disabler:active {
   background: rgba(255,0,0,0.25);
@@ -51,7 +51,7 @@
   -ms-transition: box-shadow 0.125s ease-in-out, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, -ms-transform 0.75s ease-in-out;
   transition: box-shadow 0.125s ease-in-out, opacity 0.25s ease-in-out 0.25s, margin 0.125s ease-in-out, transform 0.75s ease-in-out;
   width: 25px;
-  z-index: 9;
+  z-index: 10;
 }
 .ghost-mouse.inverted {
   background: rgba(255,255,255,0.5);
@@ -84,4 +84,16 @@
   -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.67);
   box-shadow: 0 1px 2px rgba(0,0,0,0.67);
   margin-top: -10.5px;
+}
+.ghost-mouse-trail {
+  background: rgba(255,0,0,0.75);
+  -webkit-border-radius: 50%;
+  border-radius: 50%;
+  height: 15px;
+  left: 0;
+  margin: -7.5px 0 0 -7.5px;
+  position: absolute;
+  top: 0;
+  width: 15px;
+  z-index: 9;
 }

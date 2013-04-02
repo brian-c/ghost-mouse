@@ -71,12 +71,12 @@
   };
 
   GhostMouse = (function() {
-    var downTarget, method, methods, _fn, _i, _len,
+    var method, methods, _fn, _i, _len,
       _this = this;
 
     GhostMouse.prototype.duration = 1000;
 
-    GhostMouse.prototype.events = true;
+    GhostMouse.prototype.events = false;
 
     GhostMouse.prototype.className = '';
 
@@ -88,7 +88,9 @@
 
     GhostMouse.prototype.queue = null;
 
-    downTarget = null;
+    GhostMouse.prototype.isDown = false;
+
+    GhostMouse.prototype.downTarget = null;
 
     function GhostMouse(params) {
       var property, value;
@@ -289,9 +291,10 @@
       _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), cb = arguments[_j++];
       duration = _arg[0];
       console.log('GHOST MOUSE DOWN', arguments);
+      this.isDown = true;
       this.el.classList.add('down');
       down = this.triggerEvent('mousedown');
-      this.downTarget = down.target;
+      this.downTarget = down != null ? down.target : void 0;
       if (duration == null) {
         duration = this.duration;
       }
@@ -304,8 +307,9 @@
       _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), cb = arguments[_j++];
       duration = _arg[0];
       console.log('GHOST MOUSE UP', arguments);
-      up = this.triggerEvent('mouseup');
+      this.isDown = false;
       this.el.classList.remove('down');
+      up = this.triggerEvent('mouseup');
       if (this.downTarget === (up != null ? up.target : void 0)) {
         this.triggerEvent('click');
       }
@@ -364,14 +368,27 @@
       }).call(this);
       _fn1 = function(tick) {
         return wait(tick, function() {
-          var ease, step, swing;
+          var ease, left, step, swing, top, trail;
 
           step = tick / animationDuration;
           ease = Math.sin(step * Math.PI);
           swing = [(end[0] - start[0]) / 3 * ease, (end[1] - start[1]) / 3 * ease];
-          _this.el.style.left = "" + (((end[0] - start[0]) * step) + start[0] + swing[0]) + "px";
-          _this.el.style.top = "" + (((end[1] - start[1]) * step) + start[1] - swing[1]) + "px";
-          return _this.triggerEvent('mousemove');
+          left = "" + (((end[0] - start[0]) * step) + start[0] + swing[0]) + "px";
+          top = "" + (((end[1] - start[1]) * step) + start[1] - swing[1]) + "px";
+          _this.el.style.left = left;
+          _this.el.style.top = top;
+          _this.triggerEvent('mousemove');
+          if (_this.isDown && !_this.events) {
+            trail = document.createElement('div');
+            console.log(trail);
+            trail.classList.add('ghost-mouse-trail');
+            trail.style.left = left;
+            trail.style.top = top;
+            _this.el.parentNode.appendChild(trail);
+            return wait(duration / 2, function() {
+              return trail.parentNode.removeChild(trail);
+            });
+          }
         });
       };
       for (_k = 0, _len1 = ticks.length; _k < _len1; _k++) {
