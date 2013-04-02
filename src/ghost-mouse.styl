@@ -21,6 +21,7 @@
 .ghost-mouse
   size = 25px
 
+  background: rgba(black, 0.5)
   background: linear-gradient(top, rgba(black, 0.33), rgba(black, 0.67))
   border: 2px solid white
   box-sizing: border-box
@@ -43,6 +44,7 @@
   z-index: 9
 
   &.inverted
+    background: rgba(white, 0.5)
     background: linear-gradient(top, rgba(white, 0.33), rgba(white, 0.67))
     border-color: black
 
@@ -51,6 +53,7 @@
     transform: scale(1)
 
   &.down
+    background: rgba(red, 0.67)
     background: linear-gradient(top, rgba(red, 0.5), rgba(red, 0.75))
     box-shadow: 0 1px 2px rgba(black, 0.67)
     margin-top: (size / -2) + 2

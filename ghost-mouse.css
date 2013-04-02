@@ -16,6 +16,7 @@
   display: block;
 }
 .ghost-mouse {
+  background: rgba(0,0,0,0.5);
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0, rgba(0,0,0,0.33)), color-stop(1, rgba(0,0,0,0.67)));
   background: -webkit-linear-gradient(top, rgba(0,0,0,0.33) 0%, rgba(0,0,0,0.67) 100%);
   background: -moz-linear-gradient(top, rgba(0,0,0,0.33) 0%, rgba(0,0,0,0.67) 100%);
@@ -53,6 +54,7 @@
   z-index: 9;
 }
 .ghost-mouse.inverted {
+  background: rgba(255,255,255,0.5);
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0, rgba(255,255,255,0.33)), color-stop(1, rgba(255,255,255,0.67)));
   background: -webkit-linear-gradient(top, rgba(255,255,255,0.33) 0%, rgba(255,255,255,0.67) 100%);
   background: -moz-linear-gradient(top, rgba(255,255,255,0.33) 0%, rgba(255,255,255,0.67) 100%);
@@ -72,6 +74,7 @@
   transform: scale(1);
 }
 .ghost-mouse.down {
+  background: rgba(255,0,0,0.67);
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0, rgba(255,0,0,0.5)), color-stop(1, rgba(255,0,0,0.75)));
   background: -webkit-linear-gradient(top, rgba(255,0,0,0.5) 0%, rgba(255,0,0,0.75) 100%);
   background: -moz-linear-gradient(top, rgba(255,0,0,0.5) 0%, rgba(255,0,0,0.75) 100%);
