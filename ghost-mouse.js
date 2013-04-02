@@ -3,6 +3,10 @@
   var GhostMouse, bodyStyle, getOffset, killEvent, mouseDisabler, mousePosition, updateMousePosition, wait,
     __slice = [].slice;
 
+  if (!('classList' in document.body)) {
+    throw new Error('Ghost Mouse need Element::classList or a polyfill.');
+  }
+
   mousePosition = [innerWidth / 2, innerHeight / 2];
 
   bodyStyle = getComputedStyle(document.body);
@@ -158,11 +162,6 @@
       if (!this.events) {
         return;
       }
-      target = document.elementFromPoint(x, y);
-      if (target == null) {
-        return;
-      }
-      e = document.createEvent('MouseEvent');
       bodyStyle = getComputedStyle(document.body);
       bodyMargin = (function() {
         var _i, _len, _ref, _results;
@@ -186,11 +185,26 @@
         }
         return _results;
       }).call(this);
-      _ref = [bodyMargin[0] + currentPosition[0] - scrollX, bodyMargin[1] + currentPosition[1] - scrollY], x = _ref[0], y = _ref[1];
-      e.initMouseEvent(eventName, true, true, e.view, e.detail, x, y, x, y, e.ctrlKey, e.shiftKey, e.altKey, e.metaKey, e.button, e.relatedTarget);
-      e.ghostMouse = this;
+      _ref = [currentPosition[0] - pageXOffset, currentPosition[1] - pageYOffset], x = _ref[0], y = _ref[1];
       target = document.elementFromPoint(x, y);
-      target.dispatchEvent(e);
+      if (target == null) {
+        return;
+      }
+      if ('createEvent' in document) {
+        e = document.createEvent('MouseEvent');
+        e.initMouseEvent(eventName, true, true, e.view, e.detail, currentPosition[0], currentPosition[1], currentPosition[0], currentPosition[1], e.ctrlKey, e.shiftKey, e.altKey, e.metaKey, e.button, e.relatedTarget);
+      } else {
+        document.createEventObject();
+        e.eventType = eventName;
+        e.pageX = currentPosition[0];
+        e.pageY = currentPosition[1];
+      }
+      e.ghostMouse = this;
+      if ('dispatchEvent' in target) {
+        target.dispatchEvent(e);
+      } else {
+        target.fireEvent("on" + eventName, event);
+      }
       return e;
     };
 
@@ -236,7 +250,7 @@
 
       target = arguments[0], x = arguments[1], y = arguments[2], _arg = 5 <= arguments.length ? __slice.call(arguments, 3, _j = arguments.length - 1) : (_j = 3, []), cb = arguments[_j++];
       duration = _arg[0];
-      return this.queue.push(function(cb) {
+      this.queue.push(function(cb) {
         var _this = this;
 
         console.log('GHOST MOUSE DRAG', arguments);
@@ -249,6 +263,7 @@
           });
         });
       });
+      return this;
     };
 
     GhostMouse.prototype._reset = function() {

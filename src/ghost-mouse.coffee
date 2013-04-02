@@ -1,3 +1,5 @@
+throw new Error 'Ghost Mouse need Element::classList or a polyfill.' unless 'classList' of document.body
+
 mousePosition = [innerWidth / 2, innerHeight / 2]
 bodyStyle = getComputedStyle document.body
 
@@ -103,31 +105,39 @@ class GhostMouse
   triggerEvent: (eventName) ->
     return unless @events
 
-    target = document.elementFromPoint x, y
-    return unless target?
-
-    e = document.createEvent 'MouseEvent'
-
     bodyStyle = getComputedStyle document.body
     bodyMargin = (parseFloat n for n in [bodyStyle.marginLeft, bodyStyle.marginTop])
     currentPosition = (parseFloat n for n in [@el.style.left, @el.style.top])
 
     [x, y] = [
-      bodyMargin[0] + currentPosition[0] - scrollX
-      bodyMargin[1] + currentPosition[1] - scrollY
+      currentPosition[0] - pageXOffset
+      currentPosition[1] - pageYOffset
     ]
 
-    e.initMouseEvent eventName, true, true,
-      e.view, e.detail,
-      x, y, x, y
-      e.ctrlKey, e.shiftKey,
-      e.altKey, e.metaKey,
-      e.button, e.relatedTarget
+    target = document.elementFromPoint x, y
+    return unless target?
+
+    if 'createEvent' of document
+      e = document.createEvent 'MouseEvent'
+      e.initMouseEvent eventName, true, true,
+        e.view, e.detail,
+        currentPosition[0], currentPosition[1], currentPosition[0], currentPosition[1],
+        e.ctrlKey, e.shiftKey,
+        e.altKey, e.metaKey,
+        e.button, e.relatedTarget
+
+    else
+      document.createEventObject();
+      e.eventType = eventName
+      e.pageX = currentPosition[0]
+      e.pageY = currentPosition[1]
 
     e.ghostMouse = @
 
-    target = document.elementFromPoint x, y
-    target.dispatchEvent e
+    if 'dispatchEvent' of target
+      target.dispatchEvent e
+    else
+      target.fireEvent "on#{eventName}", event
 
     # console.log "TRIGGERING EVENT #{eventName} ON", target, "AT #{x}, #{y}"
 
@@ -159,6 +169,8 @@ class GhostMouse
       @_down 100, =>
         @_move target, x, y, duration - 200, =>
           @_up 100, cb
+
+    @
 
   _reset: ([duration]..., cb) ->
     console.log 'GHOST MOUSE RESET'
