@@ -88,12 +88,11 @@ class GhostMouse
     if @queue.length is 0
       console.log 'QUEUE EMPTY'
 
-      wait @duration, =>
-        @el.classList.remove 'active'
-        document.body.classList.remove 'ghost-mouse-active'
+      @el.classList.remove 'active'
+      document.body.classList.remove 'ghost-mouse-active'
 
-        wait @duration, =>
-          @el.style.display = 'none'
+      wait @duration, =>
+        @el.style.display = 'none'
 
     else
       command = @queue.shift()

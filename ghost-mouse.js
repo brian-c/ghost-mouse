@@ -142,12 +142,10 @@
 
       if (this.queue.length === 0) {
         console.log('QUEUE EMPTY');
+        this.el.classList.remove('active');
+        document.body.classList.remove('ghost-mouse-active');
         wait(this.duration, function() {
-          _this.el.classList.remove('active');
-          document.body.classList.remove('ghost-mouse-active');
-          return wait(_this.duration, function() {
-            return _this.el.style.display = 'none';
-          });
+          return _this.el.style.display = 'none';
         });
       } else {
         command = this.queue.shift();
