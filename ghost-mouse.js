@@ -84,6 +84,8 @@
 
     GhostMouse.prototype.fps = 30;
 
+    GhostMouse.prototype.swing = 1 / 10;
+
     GhostMouse.prototype.el = null;
 
     GhostMouse.prototype.queue = null;
@@ -376,7 +378,7 @@
 
           step = tick / animationDuration;
           ease = Math.sin(step * Math.PI);
-          swing = [(end[0] - start[0]) / 3 * ease, (end[1] - start[1]) / 3 * ease];
+          swing = [(end[0] - start[0]) * _this.swing * ease, (end[1] - start[1]) * _this.swing * ease];
           left = "" + (((end[0] - start[0]) * step) + start[0] + swing[0]) + "px";
           top = "" + (((end[1] - start[1]) * step) + start[1] - swing[1]) + "px";
           _this.el.style.left = left;

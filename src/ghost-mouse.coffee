@@ -48,6 +48,7 @@ class GhostMouse
   className: ''
   inverted: false
   fps: 30
+  swing: 1 / 10
 
   el: null
   queue: null
@@ -244,7 +245,7 @@ class GhostMouse
       wait tick, =>
         step = tick / animationDuration
         ease = Math.sin step * Math.PI
-        swing = [(end[0] - start[0]) / 3 * ease, (end[1] - start[1]) / 3 * ease]
+        swing = [(end[0] - start[0]) * @swing * ease, (end[1] - start[1]) * @swing * ease]
 
         left = "#{(((end[0] - start[0])) * step) + start[0] + swing[0]}px"
         top  = "#{(((end[1] - start[1])) * step) + start[1] - swing[1]}px"
