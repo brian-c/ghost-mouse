@@ -122,6 +122,9 @@
         script.call(this);
       }
       document.body.classList.add('ghost-mouse-active');
+      if (this.events) {
+        document.body.classList.add('ghost-mouse-eventing');
+      }
       this._reset(0, function() {
         console.log('Run (after reset)');
         _this.el.style.display = '';
@@ -144,6 +147,9 @@
         console.log('QUEUE EMPTY');
         this.el.classList.remove('active');
         document.body.classList.remove('ghost-mouse-active');
+        if (this.events) {
+          document.body.classList.remove('ghost-mouse-eventing');
+        }
         wait(this.duration, function() {
           return _this.el.style.display = 'none';
         });

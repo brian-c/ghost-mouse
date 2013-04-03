@@ -71,6 +71,7 @@ class GhostMouse
     script?.call @
 
     document.body.classList.add 'ghost-mouse-active'
+    document.body.classList.add 'ghost-mouse-eventing' if @events
 
     @_reset 0, =>
       console.log 'Run (after reset)'
@@ -90,6 +91,7 @@ class GhostMouse
 
       @el.classList.remove 'active'
       document.body.classList.remove 'ghost-mouse-active'
+      document.body.classList.remove 'ghost-mouse-eventing' if @events
 
       wait @duration, =>
         @el.style.display = 'none'
