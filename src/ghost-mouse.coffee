@@ -75,11 +75,9 @@ class GhostMouse
     document.body.classList.add 'ghost-mouse-eventing' if @events
 
     @_reset 0, =>
-      console.log 'Run (after reset)'
       @el.style.display = ''
 
       wait 10, =>
-        console.log 'Add active class'
         @el.classList.add 'active'
 
       wait @duration, =>
@@ -88,8 +86,6 @@ class GhostMouse
 
   next: ->
     if @queue.length is 0
-      console.log 'QUEUE EMPTY'
-
       @el.classList.remove 'active'
       document.body.classList.remove 'ghost-mouse-active'
       document.body.classList.remove 'ghost-mouse-eventing' if @events
@@ -142,8 +138,6 @@ class GhostMouse
     else
       target.fireEvent "on#{eventName}", event
 
-    # console.log "TRIGGERING EVENT #{eventName} ON", target, "AT #{x}, #{y}"
-
     e
 
   # Attach interface methods that add actions to the queue.
@@ -158,7 +152,6 @@ class GhostMouse
 
   do: ([duration]..., fn) ->
     @queue.push (cb) ->
-      console.log 'GHOST MOUSE DO', arguments
       fn.call @
       duration ?= @duration
       wait duration, cb
@@ -167,7 +160,6 @@ class GhostMouse
 
   drag: (target, x, y, [duration]..., cb) ->
     @queue.push (cb) ->
-      console.log 'GHOST MOUSE DRAG', arguments
       duration ?= @duration
       @_down 100, =>
         @_move target, x, y, duration - 200, =>
@@ -176,7 +168,6 @@ class GhostMouse
     @
 
   _reset: ([duration]..., cb) ->
-    console.log 'GHOST MOUSE RESET'
     bodyStyle = getComputedStyle document.body
     bodyMargin = [(parseFloat bodyStyle.marginLeft), (parseFloat bodyStyle.marginTop)]
 
@@ -184,11 +175,9 @@ class GhostMouse
     @el.style.top = "#{mousePosition[1] - bodyMargin[1]}px"
 
     duration ?= @duration
-    console.log 'reset duration', duration
     wait duration, cb
 
   _down: ([duration]..., cb) ->
-    console.log 'GHOST MOUSE DOWN', arguments
     @isDown = true
     @el.classList.add 'down'
     down = @triggerEvent 'mousedown'
@@ -198,7 +187,6 @@ class GhostMouse
     wait duration, cb
 
   _up: ([duration]..., cb) ->
-    console.log 'GHOST MOUSE UP', arguments
     @isDown = false
     @el.classList.remove 'down'
     up = @triggerEvent 'mouseup'
@@ -209,7 +197,6 @@ class GhostMouse
     wait duration, cb
 
   _click: ([duration]..., cb) ->
-    console.log 'GHOST MOUSE CLICK', arguments
     @_down 250, =>
       @_up -> # No-op
 
@@ -218,8 +205,6 @@ class GhostMouse
 
   _move: (target, x, y, [duration]..., cb) ->
     target = document.querySelector target if typeof target is 'string'
-
-    console.log "GHOST MOUSE MOVE", arguments
 
     targetStyle = getComputedStyle target
     targetSize = [(parseFloat targetStyle.width), (parseFloat targetStyle.height)]
@@ -235,8 +220,6 @@ class GhostMouse
       (x * targetSize[0]) + (targetOffset[0] - elParentOffset[0])
       (y * targetSize[1]) + (targetOffset[1] - elParentOffset[1])
     ]
-
-    console.log 'Moving to', JSON.stringify end
 
     duration ?= @duration
     animationDuration = duration - 250
@@ -257,7 +240,6 @@ class GhostMouse
 
         if @isDown and not @events
           trail = document.createElement 'div'
-          console.log trail
           trail.classList.add 'ghost-mouse-trail'
           trail.style.left = left
           trail.style.top = top
