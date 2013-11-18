@@ -3,8 +3,12 @@
   "version": "0.0.7",
   "devDependencies": {
     "coffee-script": "~1.6.2",
+    "easy-exec": "~0.0.5",
     "nib": "~0.9.1",
-    "silver-server": "~0.1.1",
+    "serveup": "~0.0.5",
     "stylus": "~0.32.1"
+  },
+  "scripts": {
+    "start": "cake serve"
   }
 }
