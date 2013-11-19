@@ -7,8 +7,10 @@
     <link rel="stylesheet" href="./ghost-mouse.css" />
     <style>
       body {
-        margin: 50px;
+        border: 1px solid gray;
+        margin: 50px auto;
         position: relative;
+        width: 50%;
       }
 
       .thing {
@@ -23,10 +25,16 @@
   </head>
 
   <body>
-    <p>Drag from the first thing to the second thing.</p>
-    <p>Then click the third thing.</p>
+    <p><code>GhostMouse</code></p>
+
+    <p>Drag from the first thing to the third thing.</p>
+    <p>Then click the second thing, then click the fourth thing.</p>
+
     <p><button onclick="demo(arguments[0]);">Show me</button></p>
-    <p><button onclick="demoChained(arguments[0]);">Show me (chained)</button></p>
+
+    <p>#1 logs on mousedown, #2 logs on mousemove, #3 logs on mouseup, #4 logs on click.</p>
+
+    <p><button onclick="demoChained(arguments[0]);">Show me (inverted style, chained code, firing events)</button></p>
 
     <div class="things">
       <div class="thing one" onmousedown="console.info('Down on #1');">1</div>
@@ -38,14 +46,14 @@
     <script src="./ghost-mouse.js"></script>
     <script>
       window.gm = new GhostMouse();
-      window.gm2 = new GhostMouse({inverted: true});
+      window.gm2 = new GhostMouse({events: true, inverted: true});
 
       window.demo = function(e) {
+        e.target.disabled = true;
         window.gm.run(function() {
-          this.do(0, function() {e.target.disabled = true;});
-          this.move('.one', 0.5, 0.5);
+          this.move('.one', 0.25, 0.33);
           this.down();
-          this.move('.three', 0.5, 0.5);
+          this.move('.three', 0.75, 0.67);
           this.up();
           this.move('.two', 0.5, 0.5);
           this.click();
@@ -56,8 +64,8 @@
       };
 
       window.demoChained = function(e) {
+        e.target.disabled = true;
         window.gm2
-          .do(0, function() {e.target.disabled = true;})
           .move('.one', 0.5, 0.5)
           .down()
           .move('.three', 0.5, 0.5)
