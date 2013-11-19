@@ -92,6 +92,7 @@
   height: 15px;
   left: 0;
   margin: -7.5px 0 0 -7.5px;
+  pointer-events: none;
   position: absolute;
   top: 0;
   width: 15px;
