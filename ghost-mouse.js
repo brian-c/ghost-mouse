@@ -109,10 +109,8 @@
         document.body.classList.add('ghost-mouse-eventing');
       }
       this._reset(0, function() {
-        console.log('Run (after reset)');
         _this.el.style.display = '';
         wait(10, function() {
-          console.log('Add active class');
           return _this.el.classList.add('active');
         });
         return wait(_this.duration, function() {
@@ -126,7 +124,6 @@
       var command,
         _this = this;
       if (this.queue.length === 0) {
-        console.log('QUEUE EMPTY');
         this.el.classList.remove('active');
         document.body.classList.remove('ghost-mouse-active');
         if (this.events) {
@@ -208,7 +205,6 @@
       _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), fn = arguments[_j++];
       duration = _arg[0];
       this.queue.push(function(cb) {
-        console.log('GHOST MOUSE DO', arguments);
         fn.call(this);
         if (duration == null) {
           duration = this.duration;
@@ -224,7 +220,6 @@
       duration = _arg[0];
       this.queue.push(function(cb) {
         var _this = this;
-        console.log('GHOST MOUSE DRAG', arguments);
         if (duration == null) {
           duration = this.duration;
         }
@@ -241,14 +236,12 @@
       var cb, containerRect, duration, _arg, _j;
       _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), cb = arguments[_j++];
       duration = _arg[0];
-      console.log('GHOST MOUSE RESET');
       containerRect = this.container.getBoundingClientRect();
       this.el.style.left = "" + (mousePosition.x - (containerRect.left + pageXOffset)) + "px";
       this.el.style.top = "" + (mousePosition.y - (containerRect.top + pageYOffset)) + "px";
       if (duration == null) {
         duration = this.duration;
       }
-      console.log('reset duration', duration);
       return wait(duration, cb);
     };
 
@@ -256,7 +249,6 @@
       var cb, down, duration, _arg, _j;
       _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), cb = arguments[_j++];
       duration = _arg[0];
-      console.log('GHOST MOUSE DOWN', arguments);
       this.isDown = true;
       this.el.classList.add('down');
       down = this.triggerEvent('mousedown');
@@ -271,7 +263,6 @@
       var cb, duration, up, _arg, _j;
       _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), cb = arguments[_j++];
       duration = _arg[0];
-      console.log('GHOST MOUSE UP', arguments);
       this.isDown = false;
       this.el.classList.remove('down');
       up = this.triggerEvent('mouseup');
@@ -290,7 +281,6 @@
         _this = this;
       _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), cb = arguments[_j++];
       duration = _arg[0];
-      console.log('GHOST MOUSE CLICK', arguments);
       this._down(250, function() {
         return _this._up(function() {});
       });
@@ -308,7 +298,6 @@
       if (typeof target === 'string') {
         target = document.querySelector(target);
       }
-      console.log("GHOST MOUSE MOVE", arguments);
       targetStyle = getComputedStyle(target);
       targetSize = [parseFloat(targetStyle.width), parseFloat(targetStyle.height)];
       targetOffset = target.getBoundingClientRect();
@@ -318,7 +307,6 @@
         y: parseFloat(this.el.style.top || 0)
       };
       end = [(x * targetSize[0]) + ((targetOffset.left + pageXOffset) - (elParentOffset.left + pageXOffset)), (y * targetSize[1]) + ((targetOffset.top + pageYOffset) - (elParentOffset.top + pageYOffset))];
-      console.log('Moving to', JSON.stringify(end));
       if (duration == null) {
         duration = this.duration;
       }
@@ -347,7 +335,6 @@
           _this.triggerEvent('mousemove');
           if (_this.isDown && !_this.events) {
             trail = document.createElement('div');
-            console.log(trail);
             trail.classList.add('ghost-mouse-trail');
             trail.style.left = left;
             trail.style.top = top;
