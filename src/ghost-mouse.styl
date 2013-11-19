@@ -32,7 +32,7 @@
   border: 2px solid white
   box-sizing: border-box
   border-radius: 50%
-  box-shadow: 0 5px 3px rgba(black, 0.33)
+  box-shadow: 0 7px 10px -5px rgba(black, 0.25)
   height: size
   left: 0
   margin: (size / -2) 0 0 (size / -2)
@@ -55,13 +55,14 @@
     border-color: black
 
   &.active
+    box-shadow: 0 5px 3px 0 rgba(black, 0.33)
     opacity: 1
     transform: scale(1)
 
   &.down
     background: rgba(red, 0.67)
     background: linear-gradient(top, rgba(red, 0.5), rgba(red, 0.75))
-    box-shadow: 0 1px 2px rgba(black, 0.67)
+    box-shadow: 0 1px 2px 0 rgba(black, 0.67)
     margin-top: (size / -2) + 2
 
 .ghost-mouse-trail
