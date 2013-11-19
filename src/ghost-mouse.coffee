@@ -1,47 +1,37 @@
 throw new Error 'Ghost Mouse need Element::classList or a polyfill.' unless 'classList' of document.body
 
-mousePosition = [innerWidth / 2, innerHeight / 2]
+mousePosition =
+  x: innerWidth / 2
+  y: innerHeight / 2
 
+mouseDisablerContainer = document.createElement 'div'
+mouseDisablerContainer.classList.add 'ghost-mouse-disabler-container'
+
+mouseDisabler = document.createElement 'div'
+mouseDisabler.classList.add 'ghost-mouse-disabler'
+
+mouseDisablerContainer.appendChild mouseDisabler
+document.body.appendChild mouseDisablerContainer
 
 updateMousePosition = (e) ->
   return if e.ghostMouse?
-  mousePosition[0] = e.pageX
-  mousePosition[1] = e.pageY
 
-  bodyRect = document.body.getBoundingClientRect()
-  bodyMargin = [bodyRect.left + pageXOffset, bodyRect.top + pageYOffset]
-  mouseDisabler.style.left = "#{mousePosition[0] - bodyMargin[0]}px"
-  mouseDisabler.style.top = "#{mousePosition[1] - bodyMargin[1]}px"
+  mousePosition.x = e.pageX
+  mousePosition.y = e.pageY
 
-killEvent = (e) ->
-  e.preventDefault()
-  e.stopPropagation()
+  containerRect = mouseDisablerContainer.getBoundingClientRect()
+  containerPosition =
+    x: containerRect.left + pageXOffset
+    y: containerRect.top + pageYOffset
 
-mouseDisabler = document.createElement 'div'
-document.body.appendChild mouseDisabler
-mouseDisabler.classList.add 'ghost-mouse-disabler'
-mouseDisabler.addEventListener 'click', killEvent
-mouseDisabler.addEventListener 'mouseup', killEvent
-mouseDisabler.addEventListener 'mousedown', killEvent
-mouseDisabler.addEventListener 'mousemove', (e) ->
-  killEvent e
-  updateMousePosition e # The handler on document doesn't fire because we killed the event.
+  mouseDisabler.style.left = "#{mousePosition.x - containerPosition.x}px"
+  mouseDisabler.style.top = "#{mousePosition.y - containerPosition.y}px"
 
 document.addEventListener 'mousemove', updateMousePosition
 
 wait = (time, fn) ->
   [time, fn] = [0, time] if typeof time is 'function'
   setTimeout fn, time
-
-getOffset = (el) ->
-  offsetParent = el
-  offset = [0, 0]
-  while offsetParent?
-    offset[0] += offsetParent.offsetLeft
-    offset[1] += offsetParent.offsetTop
-    offsetParent = offsetParent.offsetParent
-
-  offset
 
 class GhostMouse
   duration: 1000
@@ -183,11 +173,10 @@ class GhostMouse
 
   _reset: ([duration]..., cb) ->
     console.log 'GHOST MOUSE RESET'
-    bodyRect = document.body.getBoundingClientRect()
-    bodyMargin = [bodyRect.left + pageXOffset, bodyRect.top + pageYOffset]
+    containerRect = @container.getBoundingClientRect()
 
-    @el.style.left = "#{mousePosition[0] - bodyMargin[0]}px"
-    @el.style.top = "#{mousePosition[1] - bodyMargin[1]}px"
+    @el.style.left = "#{mousePosition.x - (containerRect.left + pageXOffset)}px"
+    @el.style.top = "#{mousePosition.y - (containerRect.top + pageYOffset)}px"
 
     duration ?= @duration
     console.log 'reset duration', duration
@@ -229,17 +218,16 @@ class GhostMouse
 
     targetStyle = getComputedStyle target
     targetSize = [(parseFloat targetStyle.width), (parseFloat targetStyle.height)]
-    targetOffset = getOffset target
-    elParentOffset = getOffset @el.parentNode
+    targetOffset = target.getBoundingClientRect()
+    elParentOffset = @container.getBoundingClientRect()
 
-    start = [
-      parseFloat @el.style.left || 0
-      parseFloat @el.style.top || 0
-    ]
+    start =
+      x: parseFloat @el.style.left || 0
+      y: parseFloat @el.style.top || 0
 
     end = [
-      (x * targetSize[0]) + (targetOffset[0] - elParentOffset[0])
-      (y * targetSize[1]) + (targetOffset[1] - elParentOffset[1])
+      (x * targetSize[0]) + ((targetOffset.left + pageXOffset) - (elParentOffset.left + pageXOffset))
+      (y * targetSize[1]) + ((targetOffset.top + pageYOffset) - (elParentOffset.top + pageYOffset))
     ]
 
     console.log 'Moving to', JSON.stringify end
@@ -251,10 +239,12 @@ class GhostMouse
       wait tick, =>
         step = tick / animationDuration
         ease = Math.sin step * Math.PI
-        swing = [(end[0] - start[0]) * @swing * ease, (end[1] - start[1]) * @swing * ease]
+        swing =
+          x: (end[0] - start.x) * @swing * ease
+          y: (end[1] - start.y) * @swing * ease
 
-        left = "#{(((end[0] - start[0])) * step) + start[0] + swing[0]}px"
-        top  = "#{(((end[1] - start[1])) * step) + start[1] - swing[1]}px"
+        left = "#{(((end[0] - start.x)) * step) + start.x + swing.x}px"
+        top  = "#{(((end[1] - start.y)) * step) + start.y - swing.y}px"
 
         @el.style.left = left
         @el.style.top  = top

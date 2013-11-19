@@ -15,6 +15,7 @@
 .ghost-mouse-eventing .ghost-mouse-disabler {
   display: block;
 }
+.ghost-mouse-disabler-container,
 .ghost-mouse-container {
   position: absolute;
   left: 0;
