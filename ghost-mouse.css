@@ -15,6 +15,11 @@
 .ghost-mouse-eventing .ghost-mouse-disabler {
   display: block;
 }
+.ghost-mouse-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
 .ghost-mouse {
   background: rgba(0,0,0,0.5);
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0, rgba(0,0,0,0.33)), color-stop(1, rgba(0,0,0,0.67)));

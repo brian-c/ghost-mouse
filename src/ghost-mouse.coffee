@@ -1,14 +1,15 @@
 throw new Error 'Ghost Mouse need Element::classList or a polyfill.' unless 'classList' of document.body
 
 mousePosition = [innerWidth / 2, innerHeight / 2]
-bodyStyle = getComputedStyle document.body
+
 
 updateMousePosition = (e) ->
   return if e.ghostMouse?
   mousePosition[0] = e.pageX
   mousePosition[1] = e.pageY
 
-  bodyMargin = [(parseFloat bodyStyle.marginLeft), (parseFloat bodyStyle.marginTop)]
+  bodyRect = document.body.getBoundingClientRect()
+  bodyMargin = [bodyRect.left + pageXOffset, bodyRect.top + pageYOffset]
   mouseDisabler.style.left = "#{mousePosition[0] - bodyMargin[0]}px"
   mouseDisabler.style.top = "#{mousePosition[1] - bodyMargin[1]}px"
 
@@ -64,7 +65,12 @@ class GhostMouse
     @el.classList.add @className if @className
     @el.classList.add 'inverted' if @inverted
     @el.style.display = 'none'
-    document.body.appendChild @el
+
+    @container = document.createElement 'div'
+    @container.classList.add 'ghost-mouse-container'
+
+    @container.appendChild @el
+    document.body.appendChild @container
 
     @queue = []
 
@@ -108,8 +114,8 @@ class GhostMouse
   triggerEvent: (eventName) ->
     return unless @events
 
-    bodyStyle = getComputedStyle document.body
-    bodyMargin = (parseFloat n for n in [bodyStyle.marginLeft, bodyStyle.marginTop])
+    bodyRect = document.body.getBoundingClientRect()
+    bodyMargin = [bodyRect.left + pageXOffset, bodyRect.top + pageYOffset]
     currentPosition = (parseFloat n for n in [@el.style.left, @el.style.top])
 
     [x, y] = [
@@ -177,8 +183,8 @@ class GhostMouse
 
   _reset: ([duration]..., cb) ->
     console.log 'GHOST MOUSE RESET'
-    bodyStyle = getComputedStyle document.body
-    bodyMargin = [(parseFloat bodyStyle.marginLeft), (parseFloat bodyStyle.marginTop)]
+    bodyRect = document.body.getBoundingClientRect()
+    bodyMargin = [bodyRect.left + pageXOffset, bodyRect.top + pageYOffset]
 
     @el.style.left = "#{mousePosition[0] - bodyMargin[0]}px"
     @el.style.top = "#{mousePosition[1] - bodyMargin[1]}px"
@@ -261,9 +267,9 @@ class GhostMouse
           trail.classList.add 'ghost-mouse-trail'
           trail.style.left = left
           trail.style.top = top
-          @el.parentNode.appendChild trail
-          wait duration / 2, ->
-            trail.parentNode.removeChild trail
+          @container.appendChild trail
+          wait duration / 2, =>
+            @container.removeChild trail
 
     @downTarget = null
 
@@ -275,7 +281,7 @@ class GhostMouse
 
   destroy: ->
     @stop()
-    @el.parentNode.removeChild @el
+    @container.parentNode.removeChild @container
     null
 
 window?.GhostMouse = GhostMouse
