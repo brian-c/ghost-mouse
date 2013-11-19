@@ -54,21 +54,17 @@
     var method, methods, _fn, _i, _len,
       _this = this;
 
-    GhostMouse.prototype.duration = 1000;
-
-    GhostMouse.prototype.events = false;
-
     GhostMouse.prototype.className = '';
 
     GhostMouse.prototype.inverted = false;
 
+    GhostMouse.prototype.events = false;
+
+    GhostMouse.prototype.duration = 1000;
+
     GhostMouse.prototype.fps = 30;
 
     GhostMouse.prototype.swing = 1 / 10;
-
-    GhostMouse.prototype.el = null;
-
-    GhostMouse.prototype.queue = null;
 
     GhostMouse.prototype.isDown = false;
 
