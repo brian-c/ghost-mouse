@@ -1,11 +1,9 @@
 unless 'classList' of document.body
   throw new Error 'Ghost Mouse need Element::classList or a polyfill.'
 
-
 mousePosition =
   x: innerWidth / 2
   y: innerHeight / 2
-
 
 mouseDisablerContainer = document.createElement 'div'
 mouseDisablerContainer.classList.add 'ghost-mouse-disabler-container'
@@ -15,7 +13,6 @@ mouseDisabler.classList.add 'ghost-mouse-disabler'
 
 mouseDisablerContainer.appendChild mouseDisabler
 document.body.appendChild mouseDisablerContainer
-
 
 updateMousePosition = (e) ->
   return if e.ghostMouse?
@@ -32,7 +29,6 @@ updateMousePosition = (e) ->
   mouseDisabler.style.top = "#{mousePosition.y - containerPosition.y}px"
 
 document.addEventListener 'mousemove', updateMousePosition
-
 
 wait = (time, fn) ->
   [time, fn] = [0, time] if typeof time is 'function'

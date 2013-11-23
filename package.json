@@ -1,6 +1,7 @@
 {
   "name": "ghost-mouse",
-  "version": "0.0.7",
+  "version": "0.1.0",
+  "main": "ghost-mouse",
   "devDependencies": {
     "coffee-script": "~1.6.2",
     "easy-exec": "~0.0.5",
