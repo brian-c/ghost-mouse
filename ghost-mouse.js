@@ -36,7 +36,7 @@
     return mouseDisabler.style.top = "" + (mousePosition.y - containerPosition.y) + "px";
   };
 
-  document.addEventListener('mousemove', updateMousePosition);
+  addEventListener('mousemove', updateMousePosition);
 
   wait = function(time, fn) {
     var _ref;
@@ -146,25 +146,28 @@
         return _results;
       }).call(this);
       _ref = [currentPosition[0] - pageXOffset, currentPosition[1] - pageYOffset], x = _ref[0], y = _ref[1];
+      this.el.style.display = 'none';
       target = document.elementFromPoint(x, y);
+      this.el.style.display = '';
       if (target == null) {
         return;
       }
-      if ('createEvent' in document) {
-        e = document.createEvent('MouseEvent');
-        e.initMouseEvent(eventName, true, true, e.view, e.detail, currentPosition[0], currentPosition[1], currentPosition[0], currentPosition[1], e.ctrlKey, e.shiftKey, e.altKey, e.metaKey, e.button, e.relatedTarget);
-      } else {
-        document.createEventObject();
-        e.eventType = eventName;
-        e.pageX = currentPosition[0];
-        e.pageY = currentPosition[1];
+      e = document.createEvent('MouseEvents');
+      e.initMouseEvent(eventName, true, true, e.view, e.detail, currentPosition[0], currentPosition[1], currentPosition[0], currentPosition[1], e.ctrlKey, e.shiftKey, e.altKey, e.metaKey, e.button, e.relatedTarget);
+      if (e.pageX === 0 && e.pageY === 0) {
+        Object.defineProperty(e, 'pageX', {
+          get: function() {
+            return e.clientX;
+          }
+        });
+        Object.defineProperty(e, 'pageY', {
+          get: function() {
+            return e.clientY;
+          }
+        });
       }
       e.ghostMouse = this;
-      if ('dispatchEvent' in target) {
-        target.dispatchEvent(e);
-      } else {
-        target.fireEvent("on" + eventName, event);
-      }
+      target.dispatchEvent(e);
       return e;
     };
 

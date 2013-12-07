@@ -1,5 +1,11 @@
 @import "../node_modules/nib"
 
+.ghost-mouse-disabler-container,
+.ghost-mouse-container
+  left: 0
+  position: absolute
+  top: 0
+
 .ghost-mouse-disabler
   disabler-size = 100px
 
@@ -17,12 +23,6 @@
 
   [data-ghost-mouse-eventing] &
     display: block
-
-.ghost-mouse-disabler-container,
-.ghost-mouse-container
-  position: absolute
-  left: 0
-  top: 0
 
 .ghost-mouse
   size = 25px

@@ -25,7 +25,7 @@ updateMousePosition = (e) ->
   mouseDisabler.style.left = "#{mousePosition.x - containerPosition.x}px"
   mouseDisabler.style.top = "#{mousePosition.y - containerPosition.y}px"
 
-document.addEventListener 'mousemove', updateMousePosition
+addEventListener 'mousemove', updateMousePosition
 
 wait = (time, fn) ->
   [time, fn] = [0, time] if typeof time is 'function'
@@ -103,30 +103,28 @@ class GhostMouse
       currentPosition[1] - pageYOffset
     ]
 
+    @el.style.display = 'none' # IE is just the worst.
     target = document.elementFromPoint x, y
+    @el.style.display = ''
+
     return unless target?
 
-    if 'createEvent' of document
-      e = document.createEvent 'MouseEvent'
-      e.initMouseEvent eventName, true, true,
-        e.view, e.detail,
-        currentPosition[0], currentPosition[1], currentPosition[0], currentPosition[1],
-        e.ctrlKey, e.shiftKey,
-        e.altKey, e.metaKey,
-        e.button, e.relatedTarget
+    e = document.createEvent 'MouseEvents'
 
-    else
-      document.createEventObject();
-      e.eventType = eventName
-      e.pageX = currentPosition[0]
-      e.pageY = currentPosition[1]
+    e.initMouseEvent eventName, true, true,
+      e.view, e.detail,
+      currentPosition[0], currentPosition[1], currentPosition[0], currentPosition[1],
+      e.ctrlKey, e.shiftKey,
+      e.altKey, e.metaKey,
+      e.button, e.relatedTarget
+
+    if e.pageX is 0 and e.pageY is 0
+      Object.defineProperty e, 'pageX', get: -> e.clientX
+      Object.defineProperty e, 'pageY', get: -> e.clientY
 
     e.ghostMouse = @
 
-    if 'dispatchEvent' of target
-      target.dispatchEvent e
-    else
-      target.fireEvent "on#{eventName}", event
+    target.dispatchEvent e
 
     e
 

@@ -1,3 +1,9 @@
+.ghost-mouse-disabler-container,
+.ghost-mouse-container {
+  left: 0;
+  position: absolute;
+  top: 0;
+}
 .ghost-mouse-disabler {
   background: rgba(0,0,0,0.1);
   -webkit-border-radius: 50%;
@@ -14,12 +20,6 @@
 }
 [data-ghost-mouse-eventing] .ghost-mouse-disabler {
   display: block;
-}
-.ghost-mouse-disabler-container,
-.ghost-mouse-container {
-  position: absolute;
-  left: 0;
-  top: 0;
 }
 .ghost-mouse {
   background: rgba(0,0,0,0.5);
