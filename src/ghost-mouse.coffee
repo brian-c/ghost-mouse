@@ -1,15 +1,12 @@
-unless 'classList' of document.body
-  throw new Error 'Ghost Mouse need Element::classList or a polyfill.'
-
 mousePosition =
   x: innerWidth / 2
   y: innerHeight / 2
 
 mouseDisablerContainer = document.createElement 'div'
-mouseDisablerContainer.classList.add 'ghost-mouse-disabler-container'
+mouseDisablerContainer.className = 'ghost-mouse-disabler-container'
 
 mouseDisabler = document.createElement 'div'
-mouseDisabler.classList.add 'ghost-mouse-disabler'
+mouseDisabler.className = 'ghost-mouse-disabler'
 
 mouseDisablerContainer.appendChild mouseDisabler
 document.body.appendChild mouseDisablerContainer
@@ -35,7 +32,6 @@ wait = (time, fn) ->
   setTimeout fn, time
 
 class GhostMouse
-  className: ''
   inverted: false
   events: false
 
@@ -50,13 +46,12 @@ class GhostMouse
     @[property] = value for property, value of params
 
     @el = document.createElement 'div'
-    @el.classList.add 'ghost-mouse'
-    @el.classList.add @className if @className
-    @el.classList.add 'inverted' if @inverted
+    @el.className = 'ghost-mouse'
+    @el.setAttribute 'data-ghost-mouse-inverted', true if @inverted
     @el.style.display = 'none'
 
     @container = document.createElement 'div'
-    @container.classList.add 'ghost-mouse-container'
+    @container.className = 'ghost-mouse-container'
 
     @container.appendChild @el
     document.body.appendChild @container
@@ -66,14 +61,14 @@ class GhostMouse
   run: (script) ->
     script?.call @
 
-    document.body.classList.add 'ghost-mouse-active'
-    document.body.classList.add 'ghost-mouse-eventing' if @events
+    document.body.setAttribute 'data-ghost-mouse-active', true
+    document.body.setAttribute 'data-ghost-mouse-eventing', true if @events
 
     @_reset 0, =>
       @el.style.display = ''
 
       wait 10, =>
-        @el.classList.add 'active'
+        @el.setAttribute 'data-ghost-mouse-active', true
 
       wait @duration, =>
         @next()
@@ -81,9 +76,9 @@ class GhostMouse
 
   next: ->
     if @queue.length is 0
-      @el.classList.remove 'active'
-      document.body.classList.remove 'ghost-mouse-active'
-      document.body.classList.remove 'ghost-mouse-eventing' if @events
+      @el.removeAttribute 'data-ghost-mouse-active'
+      document.body.removeAttribute 'data-ghost-mouse-active'
+      document.body.removeAttribute 'data-ghost-mouse-eventing' if @events
 
       wait @duration, =>
         @el.style.display = 'none'
@@ -173,7 +168,7 @@ class GhostMouse
 
   _down: ([duration]..., cb) ->
     @isDown = true
-    @el.classList.add 'down'
+    @el.setAttribute 'data-ghost-mouse-down', true
     down = @triggerEvent 'mousedown'
     @downTarget = down?.target
 
@@ -182,7 +177,7 @@ class GhostMouse
 
   _up: ([duration]..., cb) ->
     @isDown = false
-    @el.classList.remove 'down'
+    @el.removeAttribute 'data-ghost-mouse-down'
     up = @triggerEvent 'mouseup'
     @triggerEvent 'click' if @downTarget is up?.target
     @downTarget = null
@@ -235,7 +230,7 @@ class GhostMouse
 
         if @isDown and not @events
           trail = document.createElement 'div'
-          trail.classList.add 'ghost-mouse-trail'
+          trail.className = 'ghost-mouse-trail'
           trail.style.left = left
           trail.style.top = top
           @container.appendChild trail

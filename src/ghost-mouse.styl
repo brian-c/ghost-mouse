@@ -15,7 +15,7 @@
   &:active
     background: rgba(red, 0.25)
 
-  .ghost-mouse-eventing &
+  [data-ghost-mouse-eventing] &
     display: block
 
 .ghost-mouse-disabler-container,
@@ -49,17 +49,17 @@
   width: size
   z-index: 10
 
-  &.inverted
+  &[data-ghost-mouse-inverted]
     background: rgba(white, 0.5)
     background: linear-gradient(top, rgba(white, 0.33), rgba(white, 0.67))
     border-color: black
 
-  &.active
+  &[data-ghost-mouse-active]
     box-shadow: 0 5px 3px 0 rgba(black, 0.33)
     opacity: 1
     transform: scale(1)
 
-  &.down
+  &[data-ghost-mouse-down]
     background: rgba(red, 0.67)
     background: linear-gradient(top, rgba(red, 0.5), rgba(red, 0.75))
     box-shadow: 0 1px 2px 0 rgba(black, 0.67)

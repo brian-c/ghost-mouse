@@ -3,10 +3,6 @@
   var GhostMouse, mouseDisabler, mouseDisablerContainer, mousePosition, updateMousePosition, wait,
     __slice = [].slice;
 
-  if (!('classList' in document.body)) {
-    throw new Error('Ghost Mouse need Element::classList or a polyfill.');
-  }
-
   mousePosition = {
     x: innerWidth / 2,
     y: innerHeight / 2
@@ -14,11 +10,11 @@
 
   mouseDisablerContainer = document.createElement('div');
 
-  mouseDisablerContainer.classList.add('ghost-mouse-disabler-container');
+  mouseDisablerContainer.className = 'ghost-mouse-disabler-container';
 
   mouseDisabler = document.createElement('div');
 
-  mouseDisabler.classList.add('ghost-mouse-disabler');
+  mouseDisabler.className = 'ghost-mouse-disabler';
 
   mouseDisablerContainer.appendChild(mouseDisabler);
 
@@ -54,8 +50,6 @@
     var method, methods, _fn, _i, _len,
       _this = this;
 
-    GhostMouse.prototype.className = '';
-
     GhostMouse.prototype.inverted = false;
 
     GhostMouse.prototype.events = false;
@@ -80,16 +74,13 @@
         this[property] = value;
       }
       this.el = document.createElement('div');
-      this.el.classList.add('ghost-mouse');
-      if (this.className) {
-        this.el.classList.add(this.className);
-      }
+      this.el.className = 'ghost-mouse';
       if (this.inverted) {
-        this.el.classList.add('inverted');
+        this.el.setAttribute('data-ghost-mouse-inverted', true);
       }
       this.el.style.display = 'none';
       this.container = document.createElement('div');
-      this.container.classList.add('ghost-mouse-container');
+      this.container.className = 'ghost-mouse-container';
       this.container.appendChild(this.el);
       document.body.appendChild(this.container);
       this.queue = [];
@@ -100,14 +91,14 @@
       if (script != null) {
         script.call(this);
       }
-      document.body.classList.add('ghost-mouse-active');
+      document.body.setAttribute('data-ghost-mouse-active', true);
       if (this.events) {
-        document.body.classList.add('ghost-mouse-eventing');
+        document.body.setAttribute('data-ghost-mouse-eventing', true);
       }
       this._reset(0, function() {
         _this.el.style.display = '';
         wait(10, function() {
-          return _this.el.classList.add('active');
+          return _this.el.setAttribute('data-ghost-mouse-active', true);
         });
         return wait(_this.duration, function() {
           return _this.next();
@@ -120,10 +111,10 @@
       var command,
         _this = this;
       if (this.queue.length === 0) {
-        this.el.classList.remove('active');
-        document.body.classList.remove('ghost-mouse-active');
+        this.el.removeAttribute('data-ghost-mouse-active');
+        document.body.removeAttribute('data-ghost-mouse-active');
         if (this.events) {
-          document.body.classList.remove('ghost-mouse-eventing');
+          document.body.removeAttribute('data-ghost-mouse-eventing');
         }
         wait(this.duration, function() {
           return _this.el.style.display = 'none';
@@ -246,7 +237,7 @@
       _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), cb = arguments[_j++];
       duration = _arg[0];
       this.isDown = true;
-      this.el.classList.add('down');
+      this.el.setAttribute('data-ghost-mouse-down', true);
       down = this.triggerEvent('mousedown');
       this.downTarget = down != null ? down.target : void 0;
       if (duration == null) {
@@ -260,7 +251,7 @@
       _arg = 2 <= arguments.length ? __slice.call(arguments, 0, _j = arguments.length - 1) : (_j = 0, []), cb = arguments[_j++];
       duration = _arg[0];
       this.isDown = false;
-      this.el.classList.remove('down');
+      this.el.removeAttribute('data-ghost-mouse-down');
       up = this.triggerEvent('mouseup');
       if (this.downTarget === (up != null ? up.target : void 0)) {
         this.triggerEvent('click');
@@ -331,7 +322,7 @@
           _this.triggerEvent('mousemove');
           if (_this.isDown && !_this.events) {
             trail = document.createElement('div');
-            trail.classList.add('ghost-mouse-trail');
+            trail.className = 'ghost-mouse-trail';
             trail.style.left = left;
             trail.style.top = top;
             _this.container.appendChild(trail);

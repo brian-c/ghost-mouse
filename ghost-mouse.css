@@ -12,7 +12,7 @@
 .ghost-mouse-disabler:active {
   background: rgba(255,0,0,0.25);
 }
-.ghost-mouse-eventing .ghost-mouse-disabler {
+[data-ghost-mouse-eventing] .ghost-mouse-disabler {
   display: block;
 }
 .ghost-mouse-disabler-container,
@@ -59,7 +59,7 @@
   width: 25px;
   z-index: 10;
 }
-.ghost-mouse.inverted {
+.ghost-mouse[data-ghost-mouse-inverted] {
   background: rgba(255,255,255,0.5);
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0, rgba(255,255,255,0.33)), color-stop(1, rgba(255,255,255,0.67)));
   background: -webkit-linear-gradient(top, rgba(255,255,255,0.33) 0, rgba(255,255,255,0.67) 100%);
@@ -69,7 +69,7 @@
   background: linear-gradient(top, rgba(255,255,255,0.33) 0, rgba(255,255,255,0.67) 100%);
   border-color: #000;
 }
-.ghost-mouse.active {
+.ghost-mouse[data-ghost-mouse-active] {
   -webkit-box-shadow: 0 5px 3px 0 rgba(0,0,0,0.33);
   box-shadow: 0 5px 3px 0 rgba(0,0,0,0.33);
   opacity: 1;
@@ -81,7 +81,7 @@
   -ms-transform: scale(1);
   transform: scale(1);
 }
-.ghost-mouse.down {
+.ghost-mouse[data-ghost-mouse-down] {
   background: rgba(255,0,0,0.67);
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0, rgba(255,0,0,0.5)), color-stop(1, rgba(255,0,0,0.75)));
   background: -webkit-linear-gradient(top, rgba(255,0,0,0.5) 0, rgba(255,0,0,0.75) 100%);
