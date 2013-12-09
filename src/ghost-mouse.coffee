@@ -26,6 +26,9 @@ updateMousePosition = (e) ->
   mouseDisabler.style.top = "#{mousePosition.y - containerPosition.y}px"
 
 addEventListener 'mousemove', updateMousePosition
+mouseDisabler.addEventListener 'mousemove', (e) =>
+  updateMousePosition e
+  e.stopPropagation()
 
 wait = (time, fn) ->
   [time, fn] = [0, time] if typeof time is 'function'
