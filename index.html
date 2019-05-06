@@ -7,95 +7,130 @@
     <link rel="stylesheet" href="./ghost-mouse.css" />
     <style>
       html {
-        border: 1px solid gray;
-        margin: 25px auto;
+        background: black;
+        color: white;
+        font-family: sans-serif;
+        margin: 0 auto;
+        max-width: 50ch;
         padding: 25px;
         width: 80%;
       }
 
-      body {
-        border: 1px dashed gray;
-        margin: 25px auto;
-        padding: 25px;
-        width: 80%;
-      }
-
-      .things {
-        display: inline-block;
-        overflow: hidden;
-      }
-
-      .thing {
-        background: rgba(128, 128, 128, 0.25);
-        display: inline-block;
-        float: left;
-        height: 100px;
-        line-height: 100px;
-        margin: 5px;
-        text-align: center;
-        width: 100px;
+      #scratchpad {
+        border: 1px solid;
+        border-radius: 1ch;
+        cursor: crosshair;
+        max-width: 100%;
       }
     </style>
   </head>
 
   <body>
-    <p><code>GhostMouse</code></p>
+    <h1><code>GhostMouse</code></h1>
 
-    <p>Drag from the first thing to the third thing.</p>
-    <p>Then click the second thing.</p>
-    <p>Then click the fourth thing.</p>
+    <p>This tool will allow you to pilot an automated cursor, while preventing the user from interactive with the page. It's useful for showing a user what to do during a tutorial.</p>
 
-    <p><button onclick="demo(arguments[0]);">Show me</button></p>
+    <p>For example, here's a nice little box you can draw in with your real mouse:</p>
 
-    <p>Drag from #1 to #2.</p>
-    <p>Click #3.</p>
-    <p>Drag from #3 to #4 (which <strong>shouldn't</strong> register as a click).</p>
-    <p>Note: #1 logs on mousedown, #2 logs on mousemove, #3 logs on mouseup, #4 logs on click.</p>
+    <canvas id="scratchpad" width="1000" height="1000"></canvas>
 
-    <p><button onclick="demoChained(arguments[0]);">Show me</button> (inverted style, with chained code, firing actual events)</p>
+    <script>
+      (function() {
+        const scratchpad = document.getElementById('scratchpad');
+        scratchpad.addEventListener('mousedown', handleDrawStart);
+        ctx = scratchpad.getContext('2d');
 
-    <div class="things">
-      <div class="thing one" onmousedown="console.info('Down on #1');">1</div>
-      <div class="thing two" onmousemove="console.info('Move on #2');">2</div>
-      <div class="thing three" onmouseup="console.info('Up on #3');">3</div>
-      <div class="thing four" onclick="console.info('Click on #4');">4</div>
-    </div>
+        let scratchpadLeft, scratchpadTop, scratchpadScale, previousMove;
+
+        function handleDrawStart(event) {
+          event.preventDefault();
+          const scratchpadRect = scratchpad.getBoundingClientRect();
+          scratchpadLeft = scratchpadRect.left;
+          scratchpadTop = scratchpadRect.top;
+          scratchpadScale = scratchpadRect.width / scratchpad.width;
+          addEventListener('mousemove', handleDrawMove);
+          addEventListener('mouseup', handleDrawRelease);
+          handleDrawMove(event);
+        }
+
+        function handleDrawMove(event) {
+          const x = (event.pageX - scratchpadLeft) / scratchpadScale;
+          const y = (event.pageY - scratchpadTop) / scratchpadScale;
+
+          ctx.beginPath();
+          ctx.lineWidth = 5 / scratchpadScale;
+          ctx.lineCap = 'round';
+
+          if (previousMove) {
+            ctx.moveTo(previousMove.x, previousMove.y);
+          } else {
+            ctx.moveTo(x - 1, y - 1);
+          }
+
+          ctx.strokeStyle = `hsl(${new Date().getSeconds() / 60 * 360}, 100%, 50%)`;
+          ctx.lineTo(x, y);
+          ctx.stroke();
+          previousMove = {x, y};
+        }
+
+        function handleDrawRelease() {
+          previousMove = null;
+          removeEventListener('mousemove', handleDrawMove);
+          removeEventListener('mouseup', handleDrawRelease);
+        }
+      }());
+    </script>
+
+    <p>And here are some automated drawings that the GhostMouse can do. The drawing area doesn't know anything special about these movements, GhostMouse just firing normal mouse events.</p>
+
+    <p>
+      <button type="button" id="clear-button">Clear</button>
+      <button type="button" id="cross-demo">Draw an X</button>
+      <button type="button" id="star-demo">Draw a *totally sick* pentagram</button>
+    </p>
 
     <script src="./ghost-mouse.js"></script>
     <script>
       window.gm = new GhostMouse();
-      window.gm2 = new GhostMouse({events: true, inverted: true});
 
-      window.demo = function(e) {
-        e.target.disabled = true;
-        window.gm.run(function() {
-          this.move('.one', 0.25, 0.33);
-          this.down();
-          this.move('.three', 0.75, 0.67);
-          this.up();
-          this.move('.two', 0.5, 0.5);
-          this.click();
-          this.move('.four', 0.5, 0.5);
-          this.click();
-          this.do(0, function() {e.target.disabled = false;});
-        });
-      };
+      document.getElementById('clear-button').addEventListener('click', async function(event) {
+        const scratchpad = document.getElementById('scratchpad');
+        scratchpad.getContext('2d').clearRect(0, 0, scratchpad.width, scratchpad.height);
+      });
 
-      window.demoChained = function(e) {
-        e.target.disabled = true;
-        window.gm2
-          .move('.one', 0.5, 0.5)
-          .down()
-          .move('.two', 0.5, 0.5)
-          .up()
-          .move('.three', 0.5, 0.5)
+      document.getElementById('cross-demo').addEventListener('click', async function(event) {
+        event.target.disabled = true;
+        await window.gm
+          .move('#clear-button')
           .click()
+          .move('#scratchpad', 1/10, 1/10)
           .down()
-          .move('.four', 0.5, 0.5)
+          .move('#scratchpad', 9/10, 9/10)
           .up()
-          .do(0, function() {e.target.disabled = false;})
+          .move('#scratchpad', 9/10, 1/10)
+          .down()
+          .move('#scratchpad', 1/10, 9/10)
+          .up()
           .run();
-      };
+        event.target.disabled = false;
+      });
+
+      document.getElementById('star-demo').addEventListener('click', async function(event) {
+        event.target.disabled = true;
+        await window.gm
+          .move('#clear-button')
+          .click()
+          .move('#scratchpad', 1/2, 1/10)
+          .down()
+          .move('#scratchpad', 5/6, 9/10)
+          .move('#scratchpad', 1/12, 1/3)
+          .move('#scratchpad', 11/12, 1/3)
+          .move('#scratchpad', 1/6, 9/10)
+          .move('#scratchpad', 1/2, 1/10)
+          .up()
+          .run();
+        event.target.disabled = false;
+      });
     </script>
   </body>
 </html>
