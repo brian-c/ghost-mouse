@@ -1,5 +1,8 @@
 {
   "name": "ghost-mouse",
   "version": "0.1.3",
-  "main": "ghost-mouse"
+  "main": "ghost-mouse",
+  "scripts": {
+    "start": "python -m SimpleHTTPServer 6057"
+  }
 }
