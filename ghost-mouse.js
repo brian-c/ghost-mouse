@@ -1,4 +1,5 @@
 (function() {
+  const SCROLL_DURATION = 1000 / 3;
   const TICK_DURATION = 1000 / 60;
 
   async function sleep(duration = 0) {
@@ -10,8 +11,8 @@
 
   addEventListener('mousemove', function(event) {
     if (!event.ghostMouse) {
-      realCursorTrap.style.left = `${event.pageX}px`;
-      realCursorTrap.style.top = `${event.pageY}px`;
+      realCursorTrap.style.left = `${event.clientX}px`;
+      realCursorTrap.style.top = `${event.clientY}px`;
     }
   }, true);
 
@@ -81,8 +82,8 @@
     }
 
     _triggerEvent(eventName) {
-      const x = parseFloat(this.element.style.left) - pageXOffset;
-      const y = parseFloat(this.element.style.top) - pageYOffset;
+      const x = parseFloat(this.element.style.left);
+      const y = parseFloat(this.element.style.top);
 
       this.element.style.display = 'none';
       const target = document.elementFromPoint(x, y);
@@ -96,7 +97,7 @@
       event.initMouseEvent(
         eventName, true, true,
         event.view, event.detail,
-        x, y, x, y,
+        screenX + x, screenY + y, x, y,
         event.ctrlKey, event.shiftKey, event.altKey, event.metaKey,
         event.button, event.relatedTarget
       );
@@ -105,13 +106,13 @@
         Object.defineProperties(event, {
           pageX: {
             get() {
-              return event.clientX;
+              return offsetX + event.clientX;
             },
           },
 
           pageY: {
             get() {
-              return event.clientY;
+              return offsetY + event.clientY;
             },
           },
         });
@@ -152,10 +153,18 @@
 
       const targetRect = targetElement.getBoundingClientRect();
 
-      const endX = pageXOffset + targetRect.left + targetRect.width * x;
-      const endY = pageYOffset + targetRect.top + targetRect.height * y;
+      const endX = targetRect.left + targetRect.width * x;
+      const endY = targetRect.top + targetRect.height * y;
 
-      const startTime = Date.now();
+      if (endX < 0 || endY < 0) {
+        targetElement.scrollIntoView({
+          behavior: 'smooth'
+        });
+
+        await sleep(SCROLL_DURATION);
+        return this._move(...arguments);
+      }
+
       let elapsedTime = 0;
       while (elapsedTime <= duration) {
         const progress = elapsedTime / duration;

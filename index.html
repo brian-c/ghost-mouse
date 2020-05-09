@@ -11,7 +11,6 @@
         color: white;
         font: normal 1.2rem/1.7 sans-serif;
         margin: 0 auto;
-        max-width: 50ch;
         padding: 25px;
         width: 80%;
       }
@@ -21,7 +20,7 @@
         border: 1px solid;
         border-radius: 1ch;
         cursor: crosshair;
-        max-width: 100%;
+        max-width: 67vmin;
       }
 
       .visible-script {
@@ -37,12 +36,12 @@
 
     <p>This tool will allow you to pilot an automated cursor, while preventing the user from interactive with the page. It's useful for showing a user what to do during a tutorial.</p>
 
-    <p>For example, here's a nice little box you can draw in with your real mouse:</p>
+    <p>To demonstrate, here's a nice little box you can draw in with your real mouse:</p>
 
     <canvas id="scratchpad" width="1000" height="1000"></canvas>
 
     <details>
-      <summary>Source for the scratchpad</summary>
+      <summary>View source for the scratchpad</summary>
 
       <script class="visible-script">
         (function() {
@@ -64,8 +63,8 @@
           }
 
           function handleDrawMove(event) {
-            const x = (event.pageX - scratchpadLeft) / scratchpadScale;
-            const y = (event.pageY - scratchpadTop) / scratchpadScale;
+            const x = (event.clientX - scratchpadLeft) / scratchpadScale;
+            const y = (event.clientY - scratchpadTop) / scratchpadScale;
 
             ctx.beginPath();
             ctx.lineWidth = 5 / scratchpadScale;
@@ -92,17 +91,17 @@
       </script>
     </details>
 
-    <p>And here are some automated drawings that demo what GhostMouse can do. The drawing area doesn't know anything special about these movements, GhostMouse just fires normal mouse events.</p>
+    <p>And here are some automated drawings that show a GhostMouse in action. The drawing area doesn't know anything special about these movements, GhostMouse just fires normal mouse events (and only mouse events, for now&mdash;no touch or pointer events).</p>
 
     <p>
       <button type="button" id="clear-button">Clear</button>
       <button type="button" id="cross-demo">Draw an X</button>
-      <button type="button" id="star-demo">Draw a *totally sick* pentagram</button>
+      <button type="button" id="star-demo">Draw a star</button>
     </p>
 
     <script src="./ghost-mouse.js"></script>
     <details>
-      <summary>Source for the demos</summary>
+      <summary>View source for the demos</summary>
 
       <script class="visible-script">
         window.gm = new GhostMouse();
